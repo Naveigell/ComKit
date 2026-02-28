@@ -1,7 +1,6 @@
+import bcrypt
 from datetime import datetime, timedelta
-from typing import Optional
 from jose import JWTError, jwt
-from passlib.context import CryptContext
 from fastapi import HTTPException, Security, Depends
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from sqlalchemy.orm import Session
@@ -18,14 +17,20 @@ ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60
 REFRESH_TOKEN_EXPIRE_DAYS = 30
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 security = HTTPBearer()
 
 def hash_password(password: str) -> str:
-    return pwd_context.hash(password)
+    # Hash password using bcrypt directly
+    password_bytes = password.encode('utf-8')
+    salt = bcrypt.gensalt()
+    hashed = bcrypt.hashpw(password_bytes, salt)
+    return hashed.decode('utf-8')
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
-    return pwd_context.verify(plain_password, hashed_password)
+    # Verify password using bcrypt directly
+    plain_password_bytes = plain_password.encode('utf-8')
+    hashed_password_bytes = hashed_password.encode('utf-8')
+    return bcrypt.checkpw(plain_password_bytes, hashed_password_bytes)
 
 def create_access_token(data: dict) -> str:
     to_encode = data.copy()
