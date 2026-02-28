@@ -149,3 +149,4 @@ test-server/outputs/
 # OS specific files
 .DS_Store
 Thumbs.db
+.venv_*
