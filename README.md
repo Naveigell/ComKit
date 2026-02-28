@@ -2,6 +2,10 @@
 
 ComKit is a community kitchen sharing platform that allows users to borrow and share kitchen items within their community. This platform helps reduce waste and promote resource sharing among neighbors.
 
+## POSTMAN collection
+
+You can download the postman collection in this [postman link](https://www.postman.com/mission-candidate-28241265/workspace/comkit)
+
 ## Database Setup
 
 If you want to create database, please run `python server-fastapi/migration.py`
