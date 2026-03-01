@@ -12,6 +12,8 @@ describe('Register Page', () => {
     vi.clearAllMocks()
   })
 
+  const getVm = (wrapper: any) => wrapper.vm as any
+
   it('renders registration form correctly', () => {
     const wrapper = mount(Register, {
       global: {
@@ -99,23 +101,28 @@ describe('Register Page', () => {
     await addressTextarea.setValue('123 Test St')
     await passwordInput.setValue('password123')
     await confirmPasswordInput.setValue('password123')
-    
-    expect(wrapper.vm.form.username).toBe('testuser')
-    expect(wrapper.vm.form.name).toBe('Test User')
-    expect(wrapper.vm.form.address).toBe('123 Test St')
-    expect(wrapper.vm.form.password).toBe('password123')
-    expect(wrapper.vm.form.confirmPassword).toBe('password123')
+
+    const vm = getVm(wrapper)
+
+    expect(vm.form.username).toBe('testuser')
+    expect(vm.form.name).toBe('Test User')
+    expect(vm.form.address).toBe('123 Test St')
+    expect(vm.form.password).toBe('password123')
+    expect(vm.form.confirmPassword).toBe('password123')
   })
 
   it('toggles terms agreement checkbox', async () => {
     const wrapper = mount(Register)
     
     const checkbox = wrapper.find('input#agree-terms')
+
+    const vm = getVm(wrapper)
     
-    expect(wrapper.vm.form.agreeTerms).toBe(false)
+    expect(vm.form.agreeTerms).toBe(false)
     
-    await checkbox.setChecked(true)
-    expect(wrapper.vm.form.agreeTerms).toBe(true)
+    await (checkbox as any).setChecked(true)
+
+    expect(vm.form.agreeTerms).toBe(true)
   })
 
   it('shows loading state', () => {
@@ -131,9 +138,11 @@ describe('Register Page', () => {
     })
     
     const button = wrapper.find('button[type="submit"]')
-    
+
+    const vm = getVm(wrapper)
+
     expect(button.text()).toBe('Create account')
-    expect(wrapper.vm.loading).toBe(false)
+    expect(vm.loading).toBe(false)
   })
 
   it('displays error message when error exists', () => {
@@ -147,8 +156,10 @@ describe('Register Page', () => {
         }
       }
     })
-    
-    expect(wrapper.vm.error).toBe('')
+
+    const vm = getVm(wrapper)
+
+    expect(vm.error).toBe('')
     
     const errorDiv = wrapper.find('.bg-red-50')
     expect(errorDiv.exists()).toBe(false)
@@ -165,8 +176,10 @@ describe('Register Page', () => {
         }
       }
     })
-    
-    expect(wrapper.vm.success).toBe('')
+
+    const vm = getVm(wrapper)
+
+    expect(vm.success).toBe('')
     
     const successDiv = wrapper.find('.bg-green-50')
     expect(successDiv.exists()).toBe(false)
@@ -183,8 +196,10 @@ describe('Register Page', () => {
     await confirmPasswordInput.setValue('different')
     
     await form.trigger('submit.prevent')
-    
-    expect(wrapper.vm.error).toBe('Passwords do not match')
+
+    const vm = getVm(wrapper)
+
+    expect(vm.error).toBe('Passwords do not match')
   })
 
   it('validates password length', async () => {
@@ -198,8 +213,10 @@ describe('Register Page', () => {
     await confirmPasswordInput.setValue('123')
     
     await form.trigger('submit.prevent')
+
+    const vm = getVm(wrapper)
     
-    expect(wrapper.vm.error).toBe('Password must be at least 6 characters long')
+    expect(vm.error).toBe('Password must be at least 6 characters long')
   })
 
   it('validates terms agreement', async () => {
@@ -215,8 +232,10 @@ describe('Register Page', () => {
     // Don't check terms checkbox
     
     await form.trigger('submit.prevent')
+
+    const vm = getVm(wrapper)
     
-    expect(wrapper.vm.error).toBe('You must agree to the terms and conditions')
+    expect(vm.error).toBe('You must agree to the terms and conditions')
   })
 
   it('submits form with valid data', async () => {
@@ -235,15 +254,17 @@ describe('Register Page', () => {
     await addressTextarea.setValue('123 Test St')
     await passwordInput.setValue('password123')
     await confirmPasswordInput.setValue('password123')
-    await termsCheckbox.setChecked(true)
+    await (termsCheckbox as any).setChecked(true)
     
     await form.trigger('submit.prevent')
+
+    const vm = getVm(wrapper)
     
-    expect(wrapper.vm.form.username).toBe('testuser')
-    expect(wrapper.vm.form.name).toBe('Test User')
-    expect(wrapper.vm.form.address).toBe('123 Test St')
-    expect(wrapper.vm.form.password).toBe('password123')
-    expect(wrapper.vm.form.confirmPassword).toBe('password123')
-    expect(wrapper.vm.form.agreeTerms).toBe(true)
+    expect(vm.form.username).toBe('testuser')
+    expect(vm.form.name).toBe('Test User')
+    expect(vm.form.address).toBe('123 Test St')
+    expect(vm.form.password).toBe('password123')
+    expect(vm.form.confirmPassword).toBe('password123')
+    expect(vm.form.agreeTerms).toBe(true)
   })
 })

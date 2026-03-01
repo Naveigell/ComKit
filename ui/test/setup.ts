@@ -1,13 +1,15 @@
-import { vi } from 'vitest'
+import {MockInstance, vi} from 'vitest'
 import { config } from '@vue/test-utils'
 
-global.vi = vi
+declare global {
+  var vi: any // Or import { vi } from 'vitest' and use its specific type
+  var navigateTo: MockInstance
+  var definePageMeta: MockInstance
+}
 
-// Mock navigateTo
-global.navigateTo = vi.fn()
-
-// Mock definePageMeta
-global.definePageMeta = vi.fn()
+globalThis.vi = vi
+globalThis.navigateTo = vi.fn()
+globalThis.definePageMeta = vi.fn()
 
 // Configure Vue Test Utils
 config.global.stubs = {
@@ -18,10 +20,10 @@ config.global.stubs = {
 
 // Mock Vue components for testing
 config.global.mocks = {
-  'NuxtRouteAnnouncer': {
+  NuxtRouteAnnouncer: {
     template: '<nuxt-route-announcer-stub></nuxt-route-announcer-stub>'
   },
-  'NuxtPage': {
+  NuxtPage: {
     template: '<nuxt-page-stub></nuxt-page-stub>'
   }
 }

@@ -12,6 +12,8 @@ describe('Login Page - Simple Tests', () => {
     vi.clearAllMocks()
   })
 
+  const getVm = (wrapper: any) => wrapper.vm as any
+
   it('renders login form correctly', () => {
     const wrapper = mount(Login)
     
@@ -36,9 +38,11 @@ describe('Login Page - Simple Tests', () => {
     
     await usernameInput.setValue('testuser')
     await passwordInput.setValue('testpass')
+
+    const vm = getVm(wrapper)
     
-    expect(wrapper.vm.form.username).toBe('testuser')
-    expect(wrapper.vm.form.password).toBe('testpass')
+    expect(vm.form.username).toBe('testuser')
+    expect(vm.form.password).toBe('testpass')
   })
 
   it('shows loading state', () => {
@@ -56,10 +60,12 @@ describe('Login Page - Simple Tests', () => {
     const button = wrapper.find('button[type="submit"]')
     
     expect(button.text()).toBe('Sign in')
-    
+
+    const vm = getVm(wrapper)
+
     // Test loading state by checking the template logic
     // The button text changes based on the loading property
-    expect(wrapper.vm.loading).toBe(false)
+    expect(vm.loading).toBe(false)
   })
 
   it('displays error message when error exists', () => {
@@ -73,9 +79,10 @@ describe('Login Page - Simple Tests', () => {
         }
       }
     })
-    
+
+    const vm = getVm(wrapper)
     // Check that error state is initially false
-    expect(wrapper.vm.error).toBe('')
+    expect(vm.error).toBe('')
     
     const errorDiv = wrapper.find('.bg-red-50')
     expect(errorDiv.exists()).toBe(false)

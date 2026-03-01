@@ -60,6 +60,6 @@ describe('Basic Component Tests', () => {
     const usernameInput = wrapper.find('input#username')
     await usernameInput.setValue('testuser')
     
-    expect(wrapper.vm.form.username).toBe('testuser')
+    expect((wrapper.vm as any).form.username).toBe('testuser')
   })
 })
