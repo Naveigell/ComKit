@@ -2,7 +2,7 @@
 /// <reference types="nuxt" />
 // Auth plugin to initialize auth state on app startup
 import { useAuth } from "../composables/useAuth"
-import { defineNuxtPlugin } from '#app'
+import { defineNuxtPlugin } from 'nuxt/app'
 
 export default defineNuxtPlugin(async () => {
   // Initialize auth state when app starts

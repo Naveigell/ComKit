@@ -176,12 +176,15 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
-import { useAuth } from '../../composables/useAuth'
+import { useAuth } from '~~/composables/useAuth'
+
+import guestMiddleware from "~~/middleware/guest"
 
 // Page metadata
 definePageMeta({
   title: 'Register - ComKit',
-  description: 'Create a new ComKit account'
+  description: 'Create a new ComKit account',
+  middleware: guestMiddleware,
 })
 
 // Form data interface
@@ -248,9 +251,9 @@ const handleRegister = async (): Promise<void> => {
       password: form.value.password
     })
     
-    // Registration successful - redirect to login
-    success.value = 'Account created successfully! Redirecting to login...'
-    await navigateTo('/login')
+    // Registration successful - redirect to dashboard (user is auto-logged in)
+    success.value = 'Account created successfully! Redirecting to dashboard...'
+    await navigateTo('/dashboard')
   } catch (err: any) {
     // Error is already handled by the auth composable
     console.error('Registration error:', err)

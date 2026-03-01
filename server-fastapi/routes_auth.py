@@ -40,7 +40,7 @@ def login(request: LoginRequest, response: Response, db: Session = Depends(get_d
     )
 
 @router.post("/register", response_model=AuthResponse, status_code=201)
-def register(request: RegisterRequest, db: Session = Depends(get_db)):
+def register(request: RegisterRequest, response: Response, db: Session = Depends(get_db)):
     # Check if username exists
     existing_user = db.query(User).filter(User.username == request.username).first()
     if existing_user:
@@ -61,6 +61,10 @@ def register(request: RegisterRequest, db: Session = Depends(get_db)):
     # Auto login
     access_token = create_access_token({"user_id": new_user.id, "username": new_user.username})
     refresh_token = create_refresh_token({"user_id": new_user.id})
+
+    # Set cookies for auto-login
+    response.set_cookie(key="access_token", value=access_token, httponly=True, samesite="lax")
+    response.set_cookie(key="refresh_token", value=refresh_token, httponly=True, samesite="lax")
     
     return AuthResponse(
         access_token=access_token,

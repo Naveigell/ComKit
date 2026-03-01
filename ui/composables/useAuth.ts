@@ -41,11 +41,14 @@ const clearAuthState = async () => {
   if (process.client) {
     // NO localStorage/sessionStorage cleanup - only cookies
     
-    // Clear HTTP-only cookies via API call
-    const { authApi } = await import('../services/api')
-    authApi.clearAuthCookies().catch((error: unknown) => {
+    // Clear HTTP-only cookies via API call and wait for it to complete
+    try {
+      const { authApi } = await import('../services/api')
+      await authApi.clearAuthCookies()
+    } catch (error: unknown) {
       console.error('Failed to clear auth cookies:', error)
-    })
+      // Even if cookie clearing fails, continue with logout
+    }
   }
 }
 
@@ -84,7 +87,12 @@ export const useAuth = () => {
     
     try {
       const { authApi } = await import('../services/api')
-        return await authApi.register(userData)
+      const response = await authApi.register(userData)
+      
+      // Auto-login after registration by setting user state
+      user.value = response.user
+      
+      return response
     } catch (err) {
       const apiError = err as ApiError
       error.value = apiError.detail || 'Registration failed'
@@ -96,9 +104,15 @@ export const useAuth = () => {
   
   // Logout method
   const logout = async () => {
-    await clearAuthState()
-    // Navigate to login page
-    navigateTo('/login')
+    try {
+      await clearAuthState()
+      // Navigate to login page after successfully clearing auth state
+      await navigateTo('/login')
+    } catch (error) {
+      console.error('Logout error:', error)
+      // Even if there's an error, still try to navigate to login
+      await navigateTo('/login')
+    }
   }
   
   // Initialize auth state
