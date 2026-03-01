@@ -8,6 +8,12 @@ export interface LoginRequest {
   password: string
 }
 
+export interface SetAuthCookiesRequest {
+  access_token: string
+  refresh_token: string
+  remember_me: boolean
+}
+
 export interface AuthResponse {
   access_token: string
   refresh_token: string
@@ -41,6 +47,7 @@ class ApiClient {
     const url = `${this.baseURL}${endpoint}`
     
     const config: RequestInit = {
+      credentials: 'include', // Include cookies in requests
       headers: {
         'Content-Type': 'application/json',
         ...options.headers,
@@ -112,6 +119,16 @@ export const authApi = {
     expires_in: number
   }> {
     return apiClient.post('/auth/refresh', { refresh_token: refreshToken })
+  },
+
+  async clearAuthCookies(): Promise<void> {
+    // This endpoint should clear HTTP-only cookies on the server
+    return apiClient.post<void>('/auth/clear-cookies')
+  },
+
+  async validateCookies(): Promise<AuthResponse> {
+    // This endpoint should validate HTTP-only cookies and return auth data
+    return apiClient.get<AuthResponse>('/auth/validate-cookies')
   }
 }
 

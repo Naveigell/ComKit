@@ -42,7 +42,11 @@
       <div class="px-4 py-6 sm:px-0">
         <!-- Welcome section -->
         <div class="mb-8">
-          <h2 class="text-2xl font-bold text-gray-900">Welcome back, {{ user.name }}!</h2>
+          <h2 class="text-2xl font-bold text-gray-900">
+            <ClientOnly>
+              Welcome back, {{ user?.name || 'User' }}!
+            </ClientOnly>
+          </h2>
           <p class="mt-1 text-sm text-gray-600">Here's what's happening with your kitchen sharing community.</p>
         </div>
 
@@ -159,20 +163,21 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
+import { useAuth } from "~~/composables/useAuth"
+import authMiddleware from "~~/middleware/auth"
 
 // Page metadata
 definePageMeta({
   title: 'Dashboard - ComKit',
-  description: 'Your ComKit dashboard'
+  description: 'Your ComKit dashboard',
+  middleware: authMiddleware
 })
 
-// Interfaces
-interface User {
-  name: string
-  username: string
-}
+// Use auth composable
+const { user: authUser, logout } = useAuth()
 
+// Interfaces
 interface Stats {
   totalUsers: number
   totalItems: number
@@ -185,12 +190,10 @@ interface Activity {
   time: string
 }
 
-// State
-const user = ref<User>({
-  name: 'John Doe',
-  username: 'johndoe'
-})
+// Computed user data from auth
+const user = computed(() => authUser.value || { name: 'User', username: 'user' })
 
+// State
 const stats = ref<Stats>({
   totalUsers: 0,
   totalItems: 0,
@@ -237,8 +240,7 @@ const loadDashboardData = async (): Promise<void> => {
 
 const handleLogout = async (): Promise<void> => {
   try {
-    // TODO: Implement actual logout logic
-    await navigateTo('/login')
+    logout()
   } catch (error: any) {
     console.error('Logout error:', error)
   }

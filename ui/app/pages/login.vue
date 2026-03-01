@@ -96,10 +96,13 @@
 import { ref } from 'vue'
 import { useAuth } from '../../composables/useAuth'
 
+import guestMiddleware from "~~/middleware/guest"
+
 // Page metadata
 definePageMeta({
   title: 'Login - ComKit',
-  description: 'Sign in to your ComKit account'
+  description: 'Sign in to your ComKit account',
+  middleware: guestMiddleware
 })
 
 // Use auth composable

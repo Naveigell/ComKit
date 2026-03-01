@@ -1,81 +1,68 @@
-import { ref, computed, readonly } from 'vue'
-import type { AuthResponse, ApiError } from '../services/api'
+import {computed, readonly, ref} from 'vue'
+import type {ApiError, AuthResponse} from '../services/api'
 
 // Auth state
 const user = ref<AuthResponse['user'] | null>(null)
-const accessToken = ref<string | null>(null)
-const refreshToken = ref<string | null>(null)
 const isLoading = ref(false)
 const error = ref<string | null>(null)
+const isInitialized = ref(false)
 
-// Load auth state from localStorage on client side
-const loadAuthState = () => {
+// Load auth state from HTTP-only cookies only
+const loadAuthState = async () => {
   if (process.client) {
-    const storedUser = localStorage.getItem('auth_user')
-    const storedAccessToken = localStorage.getItem('auth_access_token')
-    const storedRefreshToken = localStorage.getItem('auth_refresh_token')
     
-    if (storedUser) user.value = JSON.parse(storedUser)
-    if (storedAccessToken) accessToken.value = storedAccessToken
-    if (storedRefreshToken) refreshToken.value = storedRefreshToken
-  }
-}
-
-// Save auth state to localStorage
-const saveAuthState = (authData: AuthResponse, rememberMe: boolean = false) => {
-  user.value = authData.user
-  accessToken.value = authData.access_token
-  refreshToken.value = authData.refresh_token
-  
-  if (process.client) {
-    if (rememberMe) {
-      localStorage.setItem('auth_user', JSON.stringify(authData.user))
-      localStorage.setItem('auth_access_token', authData.access_token)
-      localStorage.setItem('auth_refresh_token', authData.refresh_token)
-    } else {
-      // Use sessionStorage for "remember me" = false
-      sessionStorage.setItem('auth_user', JSON.stringify(authData.user))
-      sessionStorage.setItem('auth_access_token', authData.access_token)
-      sessionStorage.setItem('auth_refresh_token', authData.refresh_token)
+    // Clear any existing user info first
+    user.value = null
+    
+    // Validate from cookies to get user info
+    try {
+      const { authApi } = await import('../services/api')
+      const response = await authApi.validateCookies()
+      if (response.user) {
+        user.value = response.user
+      } else {
+        console.log('No valid user info from cookies')
+      }
+    } catch (error: unknown) {
+      // Cookie validation failed - this might be expected if the endpoint doesn't exist yet
+      console.log('Cookie validation failed, but this might be OK:', error)
+      // Don't set user to null here, let the middleware handle it
     }
+    
+    isInitialized.value = true
   }
 }
 
 // Clear auth state
-const clearAuthState = () => {
+const clearAuthState = async () => {
   user.value = null
-  accessToken.value = null
-  refreshToken.value = null
   error.value = null
   
   if (process.client) {
-    localStorage.removeItem('auth_user')
-    localStorage.removeItem('auth_access_token')
-    localStorage.removeItem('auth_refresh_token')
-    sessionStorage.removeItem('auth_user')
-    sessionStorage.removeItem('auth_access_token')
-    sessionStorage.removeItem('auth_refresh_token')
+    // NO localStorage/sessionStorage cleanup - only cookies
+    
+    // Clear HTTP-only cookies via API call
+    const { authApi } = await import('../services/api')
+    authApi.clearAuthCookies().catch((error: unknown) => {
+      console.error('Failed to clear auth cookies:', error)
+    })
   }
 }
 
 // Composable for authentication
 export const useAuth = () => {
   // Computed properties
-  const isAuthenticated = computed(() => !!accessToken.value && !!user.value)
+  const isAuthenticated = computed(() => !!user.value)
   const currentUser = computed(() => user.value)
   
   // Login method
   const login = async (username: string, password: string, rememberMe: boolean = false) => {
     isLoading.value = true
     error.value = null
-    
+
     try {
       const { authApi } = await import('../services/api')
-      const response = await authApi.login({ username, password })
-      
-      saveAuthState(response, rememberMe)
-      
-      return response
+        return await authApi.login({username, password})
     } catch (err) {
       const apiError = err as ApiError
       error.value = apiError.detail || 'Login failed'
@@ -97,12 +84,7 @@ export const useAuth = () => {
     
     try {
       const { authApi } = await import('../services/api')
-      const response = await authApi.register(userData)
-      
-      // Auto-login after registration
-      saveAuthState(response, true)
-      
-      return response
+        return await authApi.register(userData)
     } catch (err) {
       const apiError = err as ApiError
       error.value = apiError.detail || 'Registration failed'
@@ -113,23 +95,26 @@ export const useAuth = () => {
   }
   
   // Logout method
-  const logout = () => {
-    clearAuthState()
+  const logout = async () => {
+    await clearAuthState()
     // Navigate to login page
     navigateTo('/login')
   }
   
   // Initialize auth state
-  const initAuth = () => {
-    loadAuthState()
+  const initAuth = async () => {
+    if (!isInitialized.value) {
+      await loadAuthState()
+    }
+    return isInitialized.value
   }
   
   return {
     // State
     user: readonly(user),
-    accessToken: readonly(accessToken),
     isLoading: readonly(isLoading),
     error: readonly(error),
+    isInitialized: readonly(isInitialized),
     
     // Computed
     isAuthenticated,

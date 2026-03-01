@@ -4,10 +4,10 @@
 import { useAuth } from "../composables/useAuth"
 import { defineNuxtPlugin } from '#app'
 
-export default defineNuxtPlugin(() => {
+export default defineNuxtPlugin(async () => {
   // Initialize auth state when app starts
   if (process.client) {
     const { initAuth } = useAuth()
-    initAuth()
+    await initAuth()
   }
 })
