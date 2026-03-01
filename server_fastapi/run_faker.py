@@ -14,9 +14,9 @@ from faker import Faker
 current_dir = Path(__file__).parent
 sys.path.insert(0, str(current_dir))
 
-from database import Base, SessionLocal, engine
-from models import User, Item, Request, ItemType, ItemStatus, RequestStatus
-from auth import hash_password
+from server_fastapi.database import Base, SessionLocal, engine
+from server_fastapi.models import User, Item, Request, ItemType, ItemStatus, RequestStatus
+from server_fastapi.auth import hash_password
 
 # Initialize Faker
 fake = Faker()

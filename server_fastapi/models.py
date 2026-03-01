@@ -1,7 +1,7 @@
 from sqlalchemy import Column, Integer, String, Text, ForeignKey, DateTime, Enum
 from sqlalchemy.orm import relationship
 from datetime import datetime
-from database import Base
+from server_fastapi.database import Base
 import enum
 
 class ItemType(str, enum.Enum):

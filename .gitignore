@@ -142,8 +142,8 @@ dmypy.json
 cython_debug/
 
 # Model specific
-server-fastapi/kitchen.db
-server-fastapi/media/
+server_fastapi/kitchen.db
+server_fastapi/media/
 test-server/outputs/
 
 # OS specific files

@@ -7,8 +7,8 @@ from sqlalchemy.orm import Session
 import os
 from dotenv import load_dotenv
 
-from database import get_db
-from models import User
+from server_fastapi.database import get_db
+from server_fastapi.models import User
 
 load_dotenv()
 

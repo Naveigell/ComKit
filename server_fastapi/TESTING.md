@@ -4,7 +4,7 @@
 
 ### 1. Install Dependencies
 ```bash
-cd sourcecode/server-fastapi
+cd sourcecode/server_fastapi
 pip install -r requirements.txt
 ```
 
@@ -166,7 +166,7 @@ Run the server and execute the test:
 
 ```bash
 # Terminal 1: Start server
-cd sourcecode/server-fastapi
+cd sourcecode/server_fastapi
 python main.py
 
 # Terminal 2: Run tests

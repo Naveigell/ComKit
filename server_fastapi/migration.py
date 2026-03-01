@@ -13,8 +13,8 @@ from pathlib import Path
 current_dir = Path(__file__).parent
 sys.path.insert(0, str(current_dir))
 
-from database import engine, Base, DATABASE_URL
-from models import User, Item, Request, ItemType, ItemStatus, RequestStatus
+from server_fastapi.database import engine, Base, DATABASE_URL
+from server_fastapi.models import User, Item, Request, ItemType, ItemStatus, RequestStatus
 
 
 def create_database_and_tables():

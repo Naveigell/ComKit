@@ -19,22 +19,22 @@ To populate the database with test data, use the `run_faker.py` script:
 
 ```bash
 # Create 10 fake users
-python server-fastapi/run_faker.py --users 10
+python server_fastapi/run_faker.py --users 10
 
 # Create 20 fake items
-python server-fastapi/run_faker.py --items 20
+python server_fastapi/run_faker.py --items 20
 
 # Create 15 fake requests
-python server-fastapi/run_faker.py --requests 15
+python server_fastapi/run_faker.py --requests 15
 
 # Create all fake data at once (10 users, 20 items, 15 requests)
-python server-fastapi/run_faker.py --all
+python server_fastapi/run_faker.py --all
 
 # Clear all data from database
-python server-fastapi/run_faker.py --clear
+python server_fastapi/run_faker.py --clear
 
 # Custom numbers
-python server-fastapi/run_faker.py --users 5 --items 10 --requests 8
+python server_fastapi/run_faker.py --users 5 --items 10 --requests 8
 ```
 
 Available options:

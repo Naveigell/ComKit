@@ -5,9 +5,9 @@ import os
 from dotenv import load_dotenv
 import json
 
-from models import User
-from schemas import RecipeRequest, RecipeResponse
-from auth import get_current_user
+from server_fastapi.models import User
+from server_fastapi.schemas import RecipeRequest, RecipeResponse
+from server_fastapi.auth import get_current_user
 
 load_dotenv()
 

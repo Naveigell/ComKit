@@ -2,10 +2,10 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from sqlalchemy import or_
 from datetime import datetime, date
-from database import get_db
-from models import Item, Request, User, RequestStatus
-from schemas import ItemListResponse, ItemResponse, ItemOwner, RequestCreate, RequestResponse, RequestItemInfo, RequestUser
-from auth import get_current_user
+from server_fastapi.database import get_db
+from server_fastapi.models import Item, Request, User, RequestStatus
+from server_fastapi.schemas import ItemListResponse, ItemResponse, ItemOwner, RequestCreate, RequestResponse, RequestItemInfo, RequestUser
+from server_fastapi.auth import get_current_user
 
 router = APIRouter(prefix="/items", tags=["Items"])
 

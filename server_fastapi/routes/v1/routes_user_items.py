@@ -6,10 +6,10 @@ from PIL import Image
 import os
 import uuid
 
-from database import get_db
-from models import Item, Request, User, ItemType, ItemStatus, RequestStatus
-from schemas import UserItemResponse, ItemCreate, ItemUpdate
-from auth import get_current_user
+from server_fastapi.database import get_db
+from server_fastapi.models import Item, Request, User, ItemType, ItemStatus, RequestStatus
+from server_fastapi.schemas import UserItemResponse, ItemCreate, ItemUpdate
+from server_fastapi.auth import get_current_user
 
 router = APIRouter(prefix="/user/items", tags=["User Items"])
 

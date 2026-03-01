@@ -3,9 +3,9 @@ from sqlalchemy.orm import Session
 import os
 from dotenv import load_dotenv
 
-from database import get_db
-from models import Item, User, Request
-from auth import get_current_user
+from server_fastapi.database import get_db
+from server_fastapi.models import Item, User, Request
+from server_fastapi.auth import get_current_user
 
 load_dotenv()
 

@@ -3,16 +3,16 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.exceptions import RequestValidationError
 from contextlib import asynccontextmanager
-import os
+import os, sys
 
-from database import Base, engine
-from routes_auth import router as auth_router
-from routes_items import router as items_router
-from routes_user_items import router as user_items_router
-from routes_user_requests import router as user_requests_router
-from routes_ai import router as ai_router
-from routes_dev import router as dev_router
-from exceptions import http_exception_handler, validation_exception_handler
+from server_fastapi.database import Base, engine
+from server_fastapi.routes.v1.routes_auth import router as auth_router
+from server_fastapi.routes.v1.routes_items import router as items_router
+from server_fastapi.routes.v1.routes_user_items import router as user_items_router
+from server_fastapi.routes.v1.routes_user_requests import router as user_requests_router
+from server_fastapi.routes.v1.routes_ai import router as ai_router
+from server_fastapi.routes.v1.routes_dev import router as dev_router
+from server_fastapi.exceptions import http_exception_handler, validation_exception_handler
 
 # Create media directory
 os.makedirs("media/items", exist_ok=True)
@@ -49,11 +49,11 @@ app.mount("/media", StaticFiles(directory="media"), name="media")
 
 # Include routers
 app.include_router(auth_router)
-app.include_router(items_router)
-app.include_router(user_items_router)
-app.include_router(user_requests_router)
-app.include_router(ai_router)
-app.include_router(dev_router)
+# app.include_router(items_router)
+# app.include_router(user_items_router)
+# app.include_router(user_requests_router)
+# app.include_router(ai_router)
+# app.include_router(dev_router)
 
 @app.get("/")
 def root():
@@ -76,5 +76,5 @@ if __name__ == "__main__":
             port = int(sys.argv[1])
         except ValueError:
             pass
-    
-    uvicorn.run("main:app", host="0.0.0.0", port=port, reload=True)
+
+    uvicorn.run("server_fastapi.main:app", host="0.0.0.0", port=port, reload=True)

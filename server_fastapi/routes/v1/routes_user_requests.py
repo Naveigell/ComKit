@@ -2,10 +2,10 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from datetime import datetime
 
-from database import get_db
-from models import Request, Item, User, RequestStatus
-from schemas import RequestListResponse, RequestResponse, RequestItemInfo, RequestUser, RequestStatusUpdate
-from auth import get_current_user
+from server_fastapi.database import get_db
+from server_fastapi.models import Request, Item, User, RequestStatus
+from server_fastapi.schemas import RequestListResponse, RequestResponse, RequestItemInfo, RequestUser, RequestStatusUpdate
+from server_fastapi.auth import get_current_user
 
 router = APIRouter(prefix="/user/requests", tags=["User Requests"])
 
