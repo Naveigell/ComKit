@@ -1,6 +1,20 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { mount } from '@vue/test-utils'
+import { ref } from 'vue'
 import Dashboard from '../../app/pages/dashboard.vue'
+
+// Mock useAuth composable
+const mockUser = ref({
+  name: 'John Doe',
+  username: 'johndoe'
+})
+
+vi.mock('~/composables/useAuth', () => ({
+  useAuth: () => ({
+    user: mockUser,
+    logout: vi.fn()
+  })
+}))
 
 // Mock navigateTo
 vi.mock('#app/composables', () => ({

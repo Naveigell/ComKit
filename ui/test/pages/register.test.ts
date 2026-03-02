@@ -12,7 +12,7 @@ const mockRegister = vi.fn()
 const mockIsLoading = ref(false)
 const mockError = ref('')
 
-vi.mock('../../composables/useAuth', () => ({
+vi.mock('~/composables/useAuth', () => ({
   useAuth: () => ({
     register: mockRegister,
     isLoading: mockIsLoading,
@@ -41,7 +41,7 @@ describe('Register Page', () => {
       }
     })
     
-    expect(wrapper.find('h2').text()).toBe('Create your account')
+    expect(wrapper.find('h1').text()).toBe('Join ComKit')
     expect(wrapper.find('input#username').exists()).toBe(true)
     expect(wrapper.find('input#name').exists()).toBe(true)
     expect(wrapper.find('textarea#address').exists()).toBe(true)
@@ -69,11 +69,11 @@ describe('Register Page', () => {
     expect(wrapper.find('label[for="password"]').text()).toBe('Password')
     expect(wrapper.find('label[for="confirmPassword"]').text()).toBe('Confirm Password')
     
-    expect(wrapper.find('input#username').attributes('placeholder')).toBe('Choose a username')
-    expect(wrapper.find('input#name').attributes('placeholder')).toBe('Enter your full name')
-    expect(wrapper.find('textarea#address').attributes('placeholder')).toBe('Enter your address')
-    expect(wrapper.find('input#password').attributes('placeholder')).toBe('Create a password')
-    expect(wrapper.find('input#confirmPassword').attributes('placeholder')).toBe('Confirm your password')
+    expect(wrapper.find('input#username').attributes('placeholder')).toBe('@johndoe')
+    expect(wrapper.find('input#name').attributes('placeholder')).toBe('John Doe')
+    expect(wrapper.find('textarea#address').attributes('placeholder')).toBe('123 Main St, City, State 12345')
+    expect(wrapper.find('input#password').attributes('placeholder')).toBe('••••••••')
+    expect(wrapper.find('input#confirmPassword').attributes('placeholder')).toBe('••••••••')
   })
 
   it('has link to login page', () => {
@@ -90,7 +90,7 @@ describe('Register Page', () => {
     
     const loginLink = wrapper.find('a[href="/login"]')
     expect(loginLink.exists()).toBe(true)
-    expect(loginLink.text()).toContain('sign in to your existing account')
+    expect(loginLink.text()).toContain('Sign in here')
   })
 
   it('has terms and privacy policy links', () => {
@@ -156,7 +156,7 @@ describe('Register Page', () => {
 
     const vm = getVm(wrapper)
 
-    expect(button.text()).toBe('Create account')
+    expect(button.text()).toBe('Create Account')
     expect(vm.loading).toBe(false)
   })
 

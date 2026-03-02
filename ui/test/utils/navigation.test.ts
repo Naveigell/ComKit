@@ -12,7 +12,7 @@ globalThis.navigateTo = mockNavigateTo
 const mockLogin = vi.fn()
 const mockRegister = vi.fn()
 
-vi.mock('../../composables/useAuth', () => ({
+vi.mock('~/composables/useAuth', () => ({
   useAuth: () => ({
     login: mockLogin,
     register: mockRegister,
@@ -57,7 +57,7 @@ describe('Navigation Tests', () => {
 
     const loginLink = wrapper.find('a[href="/login"]')
     expect(loginLink.exists()).toBe(true)
-    expect(loginLink.text()).toContain('sign in to your existing account')
+    expect(loginLink.text()).toContain('Sign in here')
   })
 
   it('navigates to dashboard on successful login', async () => {
@@ -102,7 +102,7 @@ describe('Navigation Tests', () => {
     expect(mockNavigateTo).toHaveBeenCalledWith('/dashboard')
   })
 
-  it('navigates to login on successful registration', async () => {
+  it('navigates to dashboard on successful registration', async () => {
     mockRegister.mockResolvedValue(undefined)
     mockNavigateTo.mockResolvedValue(undefined)
 

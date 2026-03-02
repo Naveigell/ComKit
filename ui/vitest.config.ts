@@ -4,13 +4,26 @@
 /// <reference types="vite/client" />
 import { defineConfig } from 'vitest/config'
 import tsconfigPaths from 'vite-tsconfig-paths'
+import * as path from 'path'
+
 // @ts-ignore
 import vue from '@vitejs/plugin-vue'
 
-export default defineConfig(async () => {
-  
+export default defineConfig(() => {
   return {
     plugins: [vue(), tsconfigPaths()],
+    resolve: {
+      alias: {
+        '~~': path.resolve(process.cwd(), '.'),
+        '@@': path.resolve(process.cwd(), '.'),
+        '~': path.resolve(process.cwd(), '.'),
+        '@': path.resolve(process.cwd(), '.'),
+        '~~/': path.resolve(process.cwd(), './'),
+        '@@/': path.resolve(process.cwd(), './'),
+        '~/': path.resolve(process.cwd(), './'),
+        '@/': path.resolve(process.cwd(), './'),
+      }
+    },
     test: {
       environment: 'jsdom',
       globals: true,

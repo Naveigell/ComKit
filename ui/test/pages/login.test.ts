@@ -12,7 +12,7 @@ const mockLogin = vi.fn()
 const mockIsLoading = ref(false)
 const mockError = ref('')
 
-vi.mock('../../composables/useAuth', () => ({
+vi.mock('~/composables/useAuth', () => ({
   useAuth: () => ({
     login: mockLogin,
     isLoading: mockIsLoading,
