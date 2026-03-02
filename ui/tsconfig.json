@@ -12,7 +12,9 @@
       "nuxt/types"
     ],
     "paths": {
-      "#app/composables": ["./node_modules/nuxt/dist/app/composables/index.d.ts"]
+      "#app/composables": ["./node_modules/nuxt/dist/app/composables/index.d.ts"],
+      "@/*": ["./*"],
+      "~/*": ["./*"]
     }
   },
   "files": [],

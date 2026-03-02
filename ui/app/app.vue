@@ -10,6 +10,9 @@
 </script>
 
 <style>
+/* Import custom color styles */
+@import '../assets/styles/colors.css';
+
 /* Global styles */
 body {
   font-family: 'Inter', system-ui, -apple-system, sans-serif;

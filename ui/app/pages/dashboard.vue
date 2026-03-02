@@ -6,19 +6,19 @@
         <div class="flex justify-between h-16">
           <div class="flex">
             <div class="flex-shrink-0 flex items-center">
-              <h1 class="text-xl font-bold text-gray-900">ComKit</h1>
+              <h1 class="text-xl font-bold text-primary-700">ComKit</h1>
             </div>
             <div class="hidden sm:ml-6 sm:flex sm:space-x-8">
-              <a href="#" class="border-indigo-500 text-gray-900 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
+              <a href="#" class="border-primary-400 text-primary-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
                 Dashboard
               </a>
-              <a href="#" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
+              <a href="#" class="border-transparent text-primary-600 hover:border-primary-300 hover:text-primary-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
                 My Items
               </a>
-              <a href="#" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
+              <a href="#" class="border-transparent text-primary-600 hover:border-primary-300 hover:text-primary-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
                 Browse Items
               </a>
-              <a href="#" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
+              <a href="#" class="border-transparent text-primary-600 hover:border-primary-300 hover:text-primary-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
                 Requests
               </a>
             </div>
@@ -49,12 +49,12 @@
       <div class="px-4 py-6 sm:px-0">
         <!-- Welcome section -->
         <div class="mb-8">
-          <h2 class="text-2xl font-bold text-gray-900">
+          <h2 class="text-2xl font-bold text-primary-700">
             <ClientOnly>
               Welcome back, {{ user?.name || 'User' }}!
             </ClientOnly>
           </h2>
-          <p class="mt-1 text-sm text-gray-600">Here's what's happening with your kitchen sharing community.</p>
+          <p class="mt-1 text-sm text-primary-600">Here's what's happening with your kitchen sharing community.</p>
         </div>
 
         <!-- Stats grid -->
@@ -69,8 +69,8 @@
                 </div>
                 <div class="ml-5 w-0 flex-1">
                   <dl>
-                    <dt class="text-sm font-medium text-gray-500 truncate">Total Users</dt>
-                    <dd class="text-lg font-medium text-gray-900">{{ stats.totalUsers }}</dd>
+                    <dt class="text-sm font-medium text-primary-500 truncate">Total Users</dt>
+                    <dd class="text-lg font-medium text-primary-700">{{ stats.totalUsers }}</dd>
                   </dl>
                 </div>
               </div>
@@ -87,8 +87,8 @@
                 </div>
                 <div class="ml-5 w-0 flex-1">
                   <dl>
-                    <dt class="text-sm font-medium text-gray-500 truncate">Total Items</dt>
-                    <dd class="text-lg font-medium text-gray-900">{{ stats.totalItems }}</dd>
+                    <dt class="text-sm font-medium text-primary-500 truncate">Total Items</dt>
+                    <dd class="text-lg font-medium text-primary-700">{{ stats.totalItems }}</dd>
                   </dl>
                 </div>
               </div>
@@ -105,8 +105,8 @@
                 </div>
                 <div class="ml-5 w-0 flex-1">
                   <dl>
-                    <dt class="text-sm font-medium text-gray-500 truncate">My Items</dt>
-                    <dd class="text-lg font-medium text-gray-900">{{ stats.myItems }}</dd>
+                    <dt class="text-sm font-medium text-primary-500 truncate">My Items</dt>
+                    <dd class="text-lg font-medium text-primary-700">{{ stats.myItems }}</dd>
                   </dl>
                 </div>
               </div>
@@ -123,8 +123,8 @@
                 </div>
                 <div class="ml-5 w-0 flex-1">
                   <dl>
-                    <dt class="text-sm font-medium text-gray-500 truncate">Pending Requests</dt>
-                    <dd class="text-lg font-medium text-gray-900">{{ stats.pendingRequests }}</dd>
+                    <dt class="text-sm font-medium text-primary-500 truncate">Pending Requests</dt>
+                    <dd class="text-lg font-medium text-primary-700">{{ stats.pendingRequests }}</dd>
                   </dl>
                 </div>
               </div>
@@ -135,15 +135,15 @@
         <!-- Recent activity -->
         <div class="bg-white shadow rounded-lg">
           <div class="px-4 py-5 sm:p-6">
-            <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4">Recent Activity</h3>
+            <h3 class="text-lg leading-6 font-medium text-primary-700 mb-4">Recent Activity</h3>
             <div class="flow-root">
               <ul class="-mb-8">
                 <li v-for="(activity, index) in recentActivities" :key="index">
                   <div class="relative pb-8">
-                    <div v-if="index !== recentActivities.length - 1" class="absolute top-4 left-4 -ml-px mt-0.5 h-full w-0.5 bg-gray-200" aria-hidden="true"></div>
+                    <div v-if="index !== recentActivities.length - 1" class="absolute top-4 left-4 -ml-px mt-0.5 h-full w-0.5 bg-primary-200" aria-hidden="true"></div>
                     <div class="relative flex space-x-3">
                       <div>
-                        <span class="h-8 w-8 rounded-full bg-indigo-500 flex items-center justify-center ring-8 ring-white">
+                        <span class="h-8 w-8 rounded-full bg-primary-400 flex items-center justify-center ring-8 ring-white">
                           <svg class="h-5 w-5 text-white" fill="currentColor" viewBox="0 0 20 20">
                             <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
                           </svg>
@@ -151,9 +151,9 @@
                       </div>
                       <div class="min-w-0 flex-1 pt-1.5 flex justify-between space-x-4">
                         <div>
-                          <p class="text-sm text-gray-500">{{ activity.description }}</p>
+                          <p class="text-sm text-primary-600">{{ activity.description }}</p>
                         </div>
-                        <div class="text-right text-sm whitespace-nowrap text-gray-500">
+                        <div class="text-right text-sm whitespace-nowrap text-primary-600">
                           <time>{{ activity.time }}</time>
                         </div>
                       </div>
@@ -190,6 +190,7 @@ interface Stats {
   totalItems: number
   myItems: number
   pendingRequests: number
+  activeRequests: number
 }
 
 interface Activity {
@@ -205,7 +206,8 @@ const stats = ref<Stats>({
   totalUsers: 0,
   totalItems: 0,
   myItems: 0,
-  pendingRequests: 0
+  pendingRequests: 0,
+  activeRequests: 0
 })
 
 const recentActivities = ref<Activity[]>([])

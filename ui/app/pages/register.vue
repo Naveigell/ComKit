@@ -3,20 +3,20 @@
     <!-- Left side - Form -->
     <div class="flex-1 flex items-center justify-center p-8 relative overflow-hidden">
       <!-- Background decoration -->
-      <div class="absolute inset-0 bg-gradient-to-br from-indigo-50 via-white to-purple-50"></div>
-      <div class="absolute top-0 left-0 w-96 h-96 bg-gradient-to-br from-indigo-200/30 to-purple-200/30 rounded-full blur-3xl"></div>
-      <div class="absolute bottom-0 right-0 w-96 h-96 bg-gradient-to-tr from-purple-200/30 to-pink-200/30 rounded-full blur-3xl"></div>
+      <div class="absolute inset-0 bg-gradient-to-br from-primary-50 via-white to-primary-100"></div>
+      <div class="absolute top-0 left-0 w-96 h-96 bg-gradient-to-br from-primary-200/30 to-primary-300/30 rounded-full blur-3xl"></div>
+      <div class="absolute bottom-0 right-0 w-96 h-96 bg-gradient-to-tr from-primary-300/30 to-primary-200/30 rounded-full blur-3xl"></div>
       
       <!-- Form container -->
       <div class="relative w-full max-w-md">
         <!-- Logo/Brand -->
         <div class="text-center mb-8">
-          <div class="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-indigo-600 to-purple-600 rounded-2xl mb-4 shadow-lg">
+          <div class="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-primary-300 via-primary-400 to-primary-500 rounded-2xl mb-4 shadow-lg">
             <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
             </svg>
           </div>
-          <h1 class="text-3xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+          <h1 class="text-3xl font-bold bg-gradient-to-r from-primary-400 to-primary-500 bg-clip-text text-transparent">
             Join ComKit
           </h1>
           <p class="mt-2 text-gray-600">Start sharing kitchen items with your community</p>
@@ -42,7 +42,7 @@
                   name="name"
                   type="text"
                   required
-                  class="pl-10 w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 bg-white/80 backdrop-blur-sm"
+                  class="pl-10 w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-400 focus:border-transparent transition-all duration-200 bg-white/80 backdrop-blur-sm"
                   placeholder="John Doe"
                 />
               </div>
@@ -63,7 +63,7 @@
                   name="username"
                   type="text"
                   required
-                  class="pl-10 w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 bg-white/80 backdrop-blur-sm"
+                  class="pl-10 w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-400 focus:border-transparent transition-all duration-200 bg-white/80 backdrop-blur-sm"
                   placeholder="@johndoe"
                 />
               </div>
@@ -88,7 +88,7 @@
                 name="address"
                 rows="2"
                 required
-                class="pl-10 w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 bg-white/80 backdrop-blur-sm resize-none"
+                class="pl-10 w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-400 focus:border-transparent transition-all duration-200 bg-white/80 backdrop-blur-sm resize-none"
                 placeholder="123 Main St, City, State 12345"
               />
             </div>
@@ -111,7 +111,7 @@
                 name="password"
                 type="password"
                 required
-                class="pl-10 w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 bg-white/80 backdrop-blur-sm"
+                class="pl-10 w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-400 focus:border-transparent transition-all duration-200 bg-white/80 backdrop-blur-sm"
                 placeholder="••••••••"
               />
             </div>
@@ -134,7 +134,7 @@
                 name="confirmPassword"
                 type="password"
                 required
-                class="pl-10 w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 bg-white/80 backdrop-blur-sm"
+                class="pl-10 w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-400 focus:border-transparent transition-all duration-200 bg-white/80 backdrop-blur-sm"
                 placeholder="••••••••"
               />
             </div>
@@ -149,15 +149,15 @@
                 name="agree-terms"
                 type="checkbox"
                 required
-                class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                class="h-4 w-4 text-primary-400 focus:ring-primary-400 border-gray-300 rounded"
               />
             </div>
             <div class="ml-3 text-sm">
               <label for="agree-terms" class="text-gray-600">
                 I agree to the
-                <a href="#" class="text-indigo-600 hover:text-indigo-500 font-medium">Terms of Service</a>
+                <a href="#" class="text-primary-400 hover:text-primary-500 font-medium">Terms of Service</a>
                 and
-                <a href="#" class="text-indigo-600 hover:text-indigo-500 font-medium">Privacy Policy</a>
+                <a href="#" class="text-primary-400 hover:text-primary-500 font-medium">Privacy Policy</a>
               </label>
             </div>
           </div>
@@ -166,7 +166,7 @@
           <button
             type="submit"
             :disabled="loading"
-            class="w-full flex justify-center items-center px-4 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+            class="w-full flex justify-center items-center px-4 py-3 bg-gradient-to-r from-primary-300 via-primary-400 to-primary-500 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
           >
             <svg v-if="loading" class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
               <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -212,7 +212,7 @@
         <div class="mt-8 text-center">
           <p class="text-sm text-gray-600">
             Already have an account?
-            <NuxtLink to="/login" class="font-medium text-indigo-600 hover:text-indigo-500 transition-colors">
+            <NuxtLink to="/login" class="font-medium text-primary-400 hover:text-primary-500 transition-colors">
               Sign in here
             </NuxtLink>
           </p>
@@ -223,7 +223,7 @@
     <!-- Right side - Hero section -->
     <div class="hidden lg:flex lg:flex-1 relative overflow-hidden">
       <!-- Gradient background -->
-      <div class="absolute inset-0 bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600"></div>
+      <div class="absolute inset-0 bg-gradient-to-br from-primary-300 via-primary-400 to-primary-600"></div>
       
       <!-- Pattern overlay -->
       <div class="absolute inset-0 opacity-10">

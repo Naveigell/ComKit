@@ -1,12 +1,12 @@
 <template>
   <div class="min-h-screen flex flex-col md:flex-row font-sans">
-    <div class="hidden md:flex md:w-1/2 bg-indigo-600 p-12 flex-col justify-between text-white">
+    <div class="hidden md:flex md:w-1/2 bg-primary-400 p-12 flex-col justify-between text-white">
       <div>
         <h1 class="text-4xl font-bold tracking-tight">ComKit</h1>
-        <p class="mt-4 text-indigo-100 text-lg">Platform berbagi komunitas untuk mempermudah hidup Anda.</p>
+        <p class="mt-4 text-primary-100 text-lg">Platform berbagi komunitas untuk mempermudah hidup Anda.</p>
       </div>
       <div>
-        <p class="text-sm text-indigo-200">&copy; 2026 ComKit Inc.</p>
+        <p class="text-sm text-primary-200">&copy; 2026 ComKit Inc.</p>
       </div>
     </div>
 
@@ -16,7 +16,7 @@
           <h2 class="text-3xl font-extrabold text-gray-900">Welcome back</h2>
           <p class="mt-2 text-sm text-gray-600">
             Don't have an account?
-            <NuxtLink to="/register" class="font-medium text-indigo-600 hover:text-indigo-500">
+            <NuxtLink to="/register" class="font-medium text-primary-400 hover:text-primary-500">
               Sign up now
             </NuxtLink>
           </p>
@@ -31,7 +31,7 @@
                 v-model="form.username" 
                 type="text" 
                 required 
-                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500" 
+                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-400 focus:border-primary-400" 
                 placeholder="Enter username" 
                 :disabled="loading"
               />
@@ -43,7 +43,7 @@
                 v-model="form.password" 
                 type="password" 
                 required 
-                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500" 
+                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-400 focus:border-primary-400" 
                 placeholder="••••••••" 
                 :disabled="loading"
               />
@@ -55,18 +55,18 @@
               <input 
                 v-model="form.rememberMe" 
                 type="checkbox" 
-                class="h-4 w-4 text-indigo-600 border-gray-300 rounded" 
+                class="h-4 w-4 text-primary-400 border-gray-300 rounded" 
                 :disabled="loading"
               />
               <span class="ml-2">Remember me</span>
             </label>
-            <a href="#" class="text-sm font-medium text-indigo-600 hover:text-indigo-500">Forgot?</a>
+            <a href="#" class="text-sm font-medium text-primary-400 hover:text-primary-500">Forgot?</a>
           </div>
 
           <button 
             type="submit" 
             :disabled="loading" 
-            class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+            class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary-400 hover:bg-primary-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-400 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {{ loading ? 'Signing in...' : 'Sign in to account' }}
           </button>
