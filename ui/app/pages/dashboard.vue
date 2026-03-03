@@ -9,18 +9,27 @@
               <h1 class="text-xl font-bold text-primary-700">ComKit</h1>
             </div>
             <div class="hidden sm:ml-6 sm:flex sm:space-x-8">
-              <a href="#" class="border-primary-400 text-primary-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
+              <NuxtLink 
+                to="/dashboard" 
+                class="border-primary-400 text-primary-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
+              >
                 Homepage
-              </a>
-              <a href="#" class="border-transparent text-primary-600 hover:border-primary-300 hover:text-primary-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
+              </NuxtLink>
+              <NuxtLink 
+                to="/recipe" 
+                class="border-transparent text-primary-600 hover:border-primary-300 hover:text-primary-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
+              >
                 Resep
-              </a>
-              <a href="#" class="border-transparent text-primary-600 hover:border-primary-300 hover:text-primary-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium relative">
+              </NuxtLink>
+              <NuxtLink 
+                to="/mypage" 
+                class="border-transparent text-primary-600 hover:border-primary-300 hover:text-primary-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium relative"
+              >
                 MyPage
                 <span v-if="notificationCount > 0" class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">
                   {{ notificationCount }}
                 </span>
-              </a>
+              </NuxtLink>
             </div>
           </div>
           <div class="flex items-center space-x-4">

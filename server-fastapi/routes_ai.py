@@ -13,7 +13,8 @@ load_dotenv()
 
 router = APIRouter(prefix="/ai", tags=["AI Recipe"])
 
-OLLAMA_API_URL = os.getenv("OLLAMA_API_URL", "http://localhost:11434")
+OLLAMA_API_URL = os.getenv("OLLAMA_API_URL", "https://api.ollama.com")
+OLLAMA_API_KEY = os.getenv("OLLAMA_API_KEY")
 
 @router.post("/recipe", response_model=RecipeResponse)
 async def generate_recipe(
@@ -39,6 +40,11 @@ Please provide the recipe in the following JSON format:
 Only respond with valid JSON, no additional text."""
     
     try:
+        # Prepare headers for Ollama API
+        headers = {"Content-Type": "application/json"}
+        if OLLAMA_API_KEY:
+            headers["Authorization"] = f"Bearer {OLLAMA_API_KEY}"
+        
         async with httpx.AsyncClient(timeout=30.0) as client:
             response = await client.post(
                 f"{OLLAMA_API_URL}/api/generate",
@@ -46,7 +52,8 @@ Only respond with valid JSON, no additional text."""
                     "model": "llama3",
                     "prompt": prompt,
                     "stream": False
-                }
+                },
+                headers=headers
             )
             
             if response.status_code != 200:
@@ -57,13 +64,14 @@ Only respond with valid JSON, no additional text."""
                         "model": "mistral",
                         "prompt": prompt,
                         "stream": False
-                    }
+                    },
+                    headers=headers
                 )
             
             if response.status_code != 200:
                 raise HTTPException(
                     status_code=503,
-                    detail="AI service temporarily unavailable. Please try again later"
+                    detail=response.text
                 )
             
             result = response.json()

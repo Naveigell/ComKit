@@ -67,6 +67,24 @@ export interface Item {
   owner: ItemOwner
 }
 
+// AI Recipe types
+export interface RecipeRequest {
+  ingredients: string
+}
+
+export interface RecipeResponse {
+  recipe: {
+    title: string
+    ingredients: string[]
+    instructions: string[]
+    cooking_time: string
+    servings: string
+    difficulty: string
+    raw_text?: string
+  }
+  generated_at: string
+}
+
 export interface Pagination {
   current_page: number
   total_pages: number
@@ -255,6 +273,13 @@ export const itemsApi = {
     requestData: RequestItemRequest
   ): Promise<RequestItemResponse> {
     return apiClient.postWithAuth<RequestItemResponse>(`/items/${itemId}/request`, requestData)
+  }
+}
+
+// AI API service
+export const aiApi = {
+  async generateRecipe(request: RecipeRequest): Promise<RecipeResponse> {
+    return apiClient.postWithAuth<RecipeResponse>('/ai/recipe', request)
   }
 }
 
