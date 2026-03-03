@@ -26,7 +26,8 @@ export default defineNuxtConfig({
     // Public keys (exposed to client-side)
     public: {
       apiBase: process.env.API_BASE_URL || 'http://localhost:8000',
-      apiTimeout: process.env.API_TIMEOUT || '10000'
+      apiTimeout: process.env.API_TIMEOUT || '10000',
+      defaultPlaceholderImage: process.env.NUXT_PUBLIC_DEFAULT_PLACEHOLDER_IMAGE || 'https://placehold.co/600x400',
     }
   }
 })

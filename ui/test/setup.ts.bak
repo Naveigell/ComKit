@@ -3,7 +3,7 @@ import { config } from '@vue/test-utils'
 import { initApi } from '../services/api'
 
 declare global {
-  var vi: any
+  var vi: any // Or import { vi } from 'vitest' and use its specific type
   var navigateTo: MockInstance
   var definePageMeta: MockInstance
   var defineNuxtRouteMiddleware: any
@@ -15,41 +15,45 @@ globalThis.navigateTo = vi.fn()
 globalThis.definePageMeta = vi.fn()
 globalThis.defineNuxtRouteMiddleware = vi.fn(() => ({}))
 
+// Mock useRuntimeConfig
 globalThis.useRuntimeConfig = vi.fn(() => ({
   public: {
     apiBase: 'http://localhost:8000'
   }
 }))
 
+// Initialize API with test base URL
 initApi('http://localhost:8000')
 
+// Mock document.cookie for API client
 Object.defineProperty(document, 'cookie', {
   writable: true,
   value: 'access_token=mock-token'
 })
 
-export const mockFetch = vi.fn(() => {
-  const responseData = {
+// Mock fetch API with default response that can be overridden
+export const mockFetch = vi.fn(() =>
+  Promise.resolve(new Response(JSON.stringify({
     items: [],
     pagination: {
       current_page: 1,
-      total_pages: 3,
-      total_items: 67,
+      total_pages: 1,
+      total_items: 0,
       items_per_page: 25
     }
-  }
-  
-  return Promise.resolve(new Response(JSON.stringify(responseData), {
+  }), {
     status: 200,
     statusText: 'OK',
     headers: {
       'Content-Type': 'application/json'
-    }
-  }))
-})
+    },
+    ok: true
+  })
 
-globalThis.fetch = mockFetch
+// @ts-ignore
+global.fetch = mockFetch
 
+// Configure Vue Test Utils
 config.global.stubs = {
   'NuxtLink': true,
   'NuxtRouteAnnouncer': true,
@@ -60,6 +64,7 @@ config.global.stubs = {
   }
 }
 
+// Mock Vue components for testing
 config.global.mocks = {
   NuxtRouteAnnouncer: {
     template: '<nuxt-route-announcer-stub></nuxt-route-announcer-stub>'

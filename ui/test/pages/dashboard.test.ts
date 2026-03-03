@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { mount } from '@vue/test-utils'
 import { ref } from 'vue'
 import Dashboard from '../../app/pages/dashboard.vue'
+import { mockFetch } from '../setup'
 
 // Mock useAuth composable
 const mockUser = ref({
@@ -21,9 +22,68 @@ vi.mock('#app/composables', () => ({
   navigateTo: vi.fn()
 }))
 
+// Mock API responses
+const mockItemsResponse = {
+  items: [
+    {
+      id: 1,
+      name: "Bor Listrik",
+      description: "Bor listrik Bosch 500W, kondisi bagus",
+      qty: 1,
+      remaining_qty: 1,
+      unit: "pcs",
+      thumbnail_url: "/media/items/1_thumb.jpg",
+      photo_url: "/media/items/1_full.jpg",
+      type: "borrow",
+      status: "available",
+      owner: {
+        id: 2,
+        username: "jqr123",
+        name: "Jqwery Ddo",
+        address: "Depan Poskamling RT2. Jl. Mawar No. 5 RT2"
+      }
+    },
+    {
+      id: 2,
+      name: "Nasi Goreng",
+      description: "Nasi goreng sisa acara, masih hangat. Ambil secepatnya",
+      qty: 10,
+      remaining_qty: 7,
+      unit: "porsi",
+      thumbnail_url: "/media/items/2_thumb.jpg",
+      photo_url: "/media/items/2_full.jpg",
+      type: "share",
+      status: "available",
+      owner: {
+        id: 3,
+        username: "user2",
+        name: "User Dua",
+        address: "Jl. Melati No. 10 RT 01"
+      }
+    }
+  ],
+  pagination: {
+    current_page: 1,
+    total_pages: 3,
+    total_items: 67,
+    items_per_page: 25
+  }
+}
+
 describe('Dashboard Page (Homepage)', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    
+    // Setup fetch mock to return successful response
+    mockFetch.mockImplementation(() => {
+      return Promise.resolve(new Response(JSON.stringify(mockItemsResponse), {
+        status: 200,
+        statusText: 'OK',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+      }))
+    })
   })
 
   const getVm = (wrapper: any) => wrapper.vm as any
@@ -67,6 +127,10 @@ describe('Dashboard Page (Homepage)', () => {
   it('displays items list', async () => {
     const wrapper = mount(Dashboard)
     await wrapper.vm.$nextTick()
+    
+    // Wait for API call to complete
+    await new Promise(resolve => setTimeout(resolve, 0))
+    await wrapper.vm.$nextTick()
 
     // Should display mock items
     expect(wrapper.text()).toContain('Bor Listrik')
@@ -79,6 +143,10 @@ describe('Dashboard Page (Homepage)', () => {
     const wrapper = mount(Dashboard)
     const vm = getVm(wrapper)
 
+    await wrapper.vm.$nextTick()
+    
+    // Wait for API call to complete
+    await new Promise(resolve => setTimeout(resolve, 0))
     await wrapper.vm.$nextTick()
 
     expect(vm.items.length).toBe(2)
@@ -93,6 +161,12 @@ describe('Dashboard Page (Homepage)', () => {
       global: { stubs: { NuxtLink: true } }
     })
     const vm = getVm(wrapper)
+
+    await wrapper.vm.$nextTick()
+    
+    // Wait for API call to complete
+    await new Promise(resolve => setTimeout(resolve, 0))
+    await wrapper.vm.$nextTick()
 
     expect(vm.items.length).toBe(2)
     expect(vm.pagination.current_page).toBe(1)
@@ -122,7 +196,7 @@ describe('Dashboard Page (Homepage)', () => {
     await wrapper.vm.$nextTick()
     await vm.loadItems()
     await wrapper.vm.$nextTick()
-
+    
     const pagination = wrapper.find('.mt-6.flex.items-center.justify-between')
     expect(pagination.exists()).toBe(true)
     

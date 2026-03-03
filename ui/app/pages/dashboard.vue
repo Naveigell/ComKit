@@ -98,6 +98,11 @@
           </div>
         </div>
 
+        <!-- Error Message -->
+        <div v-if="error" class="mb-6 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+          {{ error }}
+        </div>
+
         <!-- Items List -->
         <div class="space-y-4">
           <div v-if="loading" class="text-center py-8">
@@ -113,13 +118,13 @@
             <div
               v-for="item in items"
               :key="item.id"
-              class="bg-white rounded-lg shadow overflow-hidden"
+              class="bg-white rounded-lg shadow overflow-hidden my-3"
             >
               <!-- Collapsed State -->
               <div v-if="!expandedItems.includes(item.id)" class="p-4">
                 <div class="flex items-center space-x-4">
                   <img
-                    :src="item.thumbnail_url || '/placeholder-item.png'"
+                    :src="item.thumbnail_url || config.public.defaultPlaceholderImage"
                     :alt="item.name"
                     class="h-16 w-16 object-cover rounded-lg"
                   />
@@ -143,7 +148,7 @@
               <div v-else class="p-6">
                 <div class="mb-4">
                   <img
-                    :src="item.photo_url || '/placeholder-item.png'"
+                    :src="item.photo_url || config.public.defaultPlaceholderImage"
                     :alt="item.name"
                     class="w-full h-48 object-cover rounded-lg"
                   />
@@ -223,6 +228,11 @@
       <div class="bg-white rounded-lg p-6 w-full max-w-md">
         <h3 class="text-lg font-bold mb-4">Request Item: {{ selectedItem?.name }}</h3>
         
+        <!-- Error Message -->
+        <div v-if="error" class="mb-4 bg-red-50 border border-red-200 text-red-700 px-3 py-2 rounded">
+          {{ error }}
+        </div>
+        
         <div class="space-y-4">
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Quantity</label>
@@ -280,7 +290,10 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
 import { useAuth } from "~~/composables/useAuth"
+import { itemsApi, type Item, type Pagination, type RequestItemRequest } from "~~/services/api"
 import authMiddleware from "~~/middleware/auth"
+
+const config = useRuntimeConfig()
 
 // Page metadata
 definePageMeta({
@@ -291,39 +304,6 @@ definePageMeta({
 
 // Use auth composable
 const { user: authUser, logout } = useAuth()
-
-// Interfaces
-interface Item {
-  id: number
-  name: string
-  description: string
-  qty: number
-  remaining_qty: number
-  unit: string
-  thumbnail_url?: string
-  photo_url?: string
-  type: 'borrow' | 'share'
-  status: 'available' | 'borrowed'
-  owner: {
-    id: number
-    username: string
-    name: string
-    address: string
-  }
-}
-
-interface Pagination {
-  current_page: number
-  total_pages: number
-  total_items: number
-  items_per_page: number
-}
-
-interface RequestForm {
-  requested_qty: number
-  date_start: string
-  date_end: string
-}
 
 // Computed user data from auth
 const user = computed(() => authUser.value || { name: 'User', username: 'user' })
@@ -345,8 +325,9 @@ const selectedItem = ref<Item | null>(null)
 const submittingRequest = ref(false)
 const notificationCount = ref(0)
 const showAddItemModal = ref(false)
+const error = ref<string>('')
 
-const requestForm = ref<RequestForm>({
+const requestForm = ref<RequestItemRequest>({
   requested_qty: 1,
   date_start: '',
   date_end: ''
@@ -356,60 +337,16 @@ const requestForm = ref<RequestForm>({
 const loadItems = async (page: number = 1, search: string = '', type: string = 'all'): Promise<void> => {
   try {
     loading.value = true
+    error.value = ''
     
-    // TODO: Replace with actual API call
-    // const response = await $fetch(`/api/items?page=${page}&search=${search}&type=${type}`)
+    const response = await itemsApi.getItems(page, search, type)
     
-    // Mock data for now
-    const mockItems: Item[] = [
-      {
-        id: 1,
-        name: "Bor Listrik",
-        description: "Bor listrik Bosch 500W, kondisi bagus",
-        qty: 1,
-        remaining_qty: 1,
-        unit: "pcs",
-        thumbnail_url: "/placeholder-item.png",
-        photo_url: "/placeholder-item.png",
-        type: "borrow",
-        status: "available",
-        owner: {
-          id: 2,
-          username: "jqr123",
-          name: "Jqwery Ddo",
-          address: "Depan Poskamling RT2. Jl. Mawar No. 5 RT2"
-        }
-      },
-      {
-        id: 2,
-        name: "Nasi Goreng",
-        description: "Nasi goreng sisa acara, masih hangat. Ambil secepatnya",
-        qty: 10,
-        remaining_qty: 7,
-        unit: "porsi",
-        thumbnail_url: "/placeholder-item.png",
-        photo_url: "/placeholder-item.png",
-        type: "share",
-        status: "available",
-        owner: {
-          id: 3,
-          username: "user2",
-          name: "User Dua",
-          address: "Jl. Melati No. 10 RT 01"
-        }
-      }
-    ]
+    items.value = response.items
+    pagination.value = response.pagination
     
-    items.value = mockItems
-    pagination.value = {
-      current_page: page,
-      total_pages: 3,
-      total_items: 67,
-      items_per_page: 25
-    }
-    
-  } catch (error: any) {
-    console.error('Error loading items:', error)
+  } catch (err: any) {
+    console.error('Error loading items:', err)
+    error.value = err.detail || 'Failed to load items'
   } finally {
     loading.value = false
   }
@@ -460,24 +397,16 @@ const submitRequest = async (): Promise<void> => {
   
   try {
     submittingRequest.value = true
+    error.value = ''
     
-    // TODO: Replace with actual API call
-    // await $fetch(`/api/items/${selectedItem.value.id}/request`, {
-    //   method: 'POST',
-    //   body: requestForm.value
-    // })
-    
-    // Mock success
-    console.log('Request submitted:', {
-      item: selectedItem.value.name,
-      ...requestForm.value
-    })
+    await itemsApi.requestItem(selectedItem.value.id, requestForm.value)
     
     closeRequestForm()
     await loadItems(pagination.value.current_page, searchQuery.value, filterType.value)
     
-  } catch (error: any) {
-    console.error('Error submitting request:', error)
+  } catch (err: any) {
+    console.error('Error submitting request:', err)
+    error.value = err.detail || 'Failed to submit request'
   } finally {
     submittingRequest.value = false
   }

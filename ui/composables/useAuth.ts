@@ -16,10 +16,15 @@ const loadAuthState = async () => {
     
     // Validate from cookies to get user info
     try {
-      const { authApi } = await import('../services/api')
+      const { authApi, setAuthToken } = await import('../services/api')
       const response = await authApi.validateCookies()
       if (response.user) {
         user.value = response.user
+        
+        // Store token for fallback authentication if available
+        if (response.access_token) {
+          setAuthToken(response.access_token)
+        }
       } else {
         console.log('No valid user info from cookies')
       }
@@ -37,6 +42,14 @@ const loadAuthState = async () => {
 const clearAuthState = async () => {
   user.value = null
   error.value = null
+  
+  // Clear stored token
+  try {
+    const { setAuthToken } = await import('../services/api')
+    setAuthToken('')
+  } catch (error) {
+    console.error('Failed to clear stored token:', error)
+  }
   
   if (process.client) {
     // NO localStorage/sessionStorage cleanup - only cookies
@@ -64,8 +77,15 @@ export const useAuth = () => {
     error.value = null
 
     try {
-      const { authApi } = await import('../services/api')
-        return await authApi.login({username, password})
+      const { authApi, setAuthToken } = await import('../services/api')
+        const response = await authApi.login({username, password})
+        
+        // Store token for fallback authentication
+        if (response.access_token) {
+          setAuthToken(response.access_token)
+        }
+        
+        return response
     } catch (err) {
       const apiError = err as ApiError
       error.value = apiError.detail || 'Login failed'
@@ -86,11 +106,16 @@ export const useAuth = () => {
     error.value = null
     
     try {
-      const { authApi } = await import('../services/api')
+      const { authApi, setAuthToken } = await import('../services/api')
       const response = await authApi.register(userData)
       
       // Auto-login after registration by setting user state
       user.value = response.user
+      
+      // Store token for fallback authentication
+      if (response.access_token) {
+        setAuthToken(response.access_token)
+      }
       
       return response
     } catch (err) {
@@ -110,7 +135,7 @@ export const useAuth = () => {
       await navigateTo('/login')
     } catch (error) {
       console.error('Logout error:', error)
-      // Even if there's an error, still try to navigate to login
+      // Even if there's an error, still try to navigate to log in
       await navigateTo('/login')
     }
   }
