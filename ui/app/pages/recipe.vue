@@ -122,11 +122,11 @@
           <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
             <div class="bg-gray-50 p-3 rounded-lg">
               <div class="text-sm text-gray-500">Cooking Time</div>
-              <div class="font-medium text-gray-900">{{ recipe.cooking_time }}</div>
+              <div class="font-medium text-gray-900">{{ recipe.cooking_time }} minutes</div>
             </div>
             <div class="bg-gray-50 p-3 rounded-lg">
               <div class="text-sm text-gray-500">Servings</div>
-              <div class="font-medium text-gray-900">{{ recipe.servings }}</div>
+              <div class="font-medium text-gray-900">{{ recipe.servings }} servings</div>
             </div>
             <div class="bg-gray-50 p-3 rounded-lg">
               <div class="text-sm text-gray-500">Difficulty</div>
@@ -164,7 +164,7 @@
 
           <!-- Generated At -->
           <div class="text-sm text-gray-500 text-right">
-            Generated at: {{ new Date(recipe.generated_at).toLocaleString() }}
+            Generated at: {{ generatedAt ? new Date(generatedAt).toLocaleString() : '' }}
           </div>
         </div>
 
@@ -200,6 +200,7 @@ const { logout } = useAuth()
 // State
 const ingredients = ref('')
 const recipe = ref<RecipeResponse['recipe'] | null>(null)
+const generatedAt = ref<string>('')
 const isLoading = ref(false)
 const error = ref('')
 const isLoggingOut = ref(false)
@@ -222,6 +223,7 @@ const generateRecipe = async () => {
     })
     
     recipe.value = response.recipe
+    generatedAt.value = response.generated_at
   } catch (err: any) {
     console.error('Error generating recipe:', err)
     error.value = err.detail || 'Failed to generate recipe. Please try again.'

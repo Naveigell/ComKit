@@ -1,13 +1,15 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from datetime import datetime
 import httpx
 import os
 from dotenv import load_dotenv
 import json
+from sqlalchemy.orm import Session
 
 from models import User
 from schemas import RecipeRequest, RecipeResponse
-from auth import get_current_user
+from auth import get_current_user, decode_token
+from database import get_db
 
 load_dotenv()
 
@@ -15,11 +17,37 @@ router = APIRouter(prefix="/ai", tags=["AI Recipe"])
 
 OLLAMA_API_URL = os.getenv("OLLAMA_API_URL", "https://api.ollama.com")
 OLLAMA_API_KEY = os.getenv("OLLAMA_API_KEY")
+DEFAULT_OLLAMA_MODEL = os.getenv("DEFAULT_OLLAMA_MODEL")
+
+# Cookie-based authentication for AI endpoint
+async def get_current_user_from_cookies_or_token(http_request: Request, db: Session = Depends(get_db)):
+    # First try to get user from cookies
+    access_token = http_request.cookies.get("access_token")
+    if access_token:
+        try:
+            payload = decode_token(access_token)
+            user_id = payload.get("user_id")
+
+            if user_id:
+                user = db.query(User).filter(User.id == user_id).first()
+                if user:
+                    return user
+        except:
+            pass
+
+    # Fall back to Bearer token
+    from fastapi.security import HTTPBearer
+    security = HTTPBearer()
+    try:
+        credentials = await security(http_request)
+        return await get_current_user(credentials, db)
+    except:
+        raise HTTPException(status_code=401, detail="Not authenticated")
 
 @router.post("/recipe", response_model=RecipeResponse)
 async def generate_recipe(
     request: RecipeRequest,
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(get_current_user_from_cookies_or_token)
 ):
     if not request.ingredients or request.ingredients.strip() == "":
         raise HTTPException(status_code=400, detail="Ingredients cannot be empty")
@@ -49,7 +77,7 @@ Only respond with valid JSON, no additional text."""
             response = await client.post(
                 f"{OLLAMA_API_URL}/api/generate",
                 json={
-                    "model": "llama3",
+                    "model": DEFAULT_OLLAMA_MODEL,
                     "prompt": prompt,
                     "stream": False
                 },
@@ -61,7 +89,7 @@ Only respond with valid JSON, no additional text."""
                 response = await client.post(
                     f"{OLLAMA_API_URL}/api/generate",
                     json={
-                        "model": "mistral",
+                        "model": DEFAULT_OLLAMA_MODEL,
                         "prompt": prompt,
                         "stream": False
                     },
