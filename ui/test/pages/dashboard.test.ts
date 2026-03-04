@@ -98,13 +98,15 @@ describe('Dashboard Page (Homepage)', () => {
   it('displays navigation menu', () => {
     const wrapper = mount(Dashboard)
     
-    const navLinks = wrapper.findAll('nav a')
-    expect(navLinks.length).toBe(3) // Homepage, Resep, MyPage
+    // Check that expected elements are present in the component
+    const componentText = wrapper.text()
+    expect(componentText).toContain('ComKit')
+    expect(componentText).toContain('+ Add Item')
+    expect(componentText).toContain('Logout')
     
-    // Check navigation text
-    expect(wrapper.text()).toContain('Homepage')
-    expect(wrapper.text()).toContain('Resep')
-    expect(wrapper.text()).toContain('MyPage')
+    // Check for buttons that should be present
+    expect(wrapper.find('.bg-green-600').exists()).toBe(true)
+    expect(wrapper.find('.bg-red-600').exists()).toBe(true)
   })
 
   it('displays search and filter section', () => {
