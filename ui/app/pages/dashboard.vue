@@ -293,6 +293,8 @@
         </div>
       </div>
     </div>
+
+    <AuthLoadingOverlay :is-authenticating="isAuthenticating" />
   </div>
 </template>
 
@@ -300,15 +302,14 @@
 import { ref, onMounted, computed } from 'vue'
 import { useAuth } from "~~/composables/useAuth"
 import { itemsApi, type Item, type Pagination, type RequestItemRequest } from "~~/services/api"
-import authMiddleware from "~~/middleware/auth"
+import AuthLoadingOverlay from "~~/components/AuthLoadingOverlay.vue"
 
 const config = useRuntimeConfig()
 
 // Page metadata
 definePageMeta({
   title: 'Homepage - ComKit',
-  description: 'Community items feed',
-  middleware: authMiddleware
+  description: 'Community items feed'
 })
 
 // Use auth composable
@@ -335,6 +336,7 @@ const submittingRequest = ref(false)
 const notificationCount = ref(0)
 const showAddItemModal = ref(false)
 const error = ref<string>('')
+const isAuthenticating = ref(false)
 
 const requestForm = ref<RequestItemRequest>({
   requested_qty: 1,
@@ -442,11 +444,24 @@ const handleLogout = async (): Promise<void> => {
   }
 }
 
-// Lifecycle
-onMounted(() => {
-  loadItems()
-  // TODO: Load notification count
-  notificationCount.value = 3 // Mock data
+// Authentication check
+onMounted(async () => {
+  // Check authentication on client side
+  if (process.client) {
+    isAuthenticating.value = true
+    try {
+      const { authApi } = await import('~~/services/api')
+      await authApi.validateCookies()
+
+      // If successful, load data
+      await loadItems()
+    } catch (error) {
+      // Redirect to login if not authenticated
+      await navigateTo('/login')
+    } finally {
+      isAuthenticating.value = false
+    }
+  }
 })
 </script>
 

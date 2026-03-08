@@ -2,6 +2,11 @@
 import {useAuth} from "../composables/useAuth";
 
 export default defineNuxtRouteMiddleware(async (to, from) => {
+  // Skip middleware for server-side rendering to avoid hydration issues
+  // We'll rely on client-side validation for now
+  if (process.server) {
+    return
+  }
 
   if (process.client) {
     // For now, let's be more permissive and assume if cookies exist, user is authenticated
@@ -15,7 +20,7 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
 
       return navigateTo('/dashboard')
     } catch (error) {
-      console.log('Authentication check failed, protect to login')
+      console.log('Authentication check failed, staying on guest page')
     }
   }
 })

@@ -122,6 +122,83 @@ export interface RequestItemResponse {
   created_at: string
 }
 
+// User Items types
+export interface UserItem {
+  id: number
+  name: string
+  description: string
+  qty: number
+  remaining_qty: number
+  unit: string
+  thumbnail_url?: string
+  photo_url?: string
+  type: 'borrow' | 'share'
+  status: 'available' | 'borrowed'
+  created_at: string
+  updated_at: string
+}
+
+export interface UserItemListResponse {
+  items: UserItem[]
+}
+
+export interface UserItemCreate {
+  name: string
+  description: string
+  qty: number
+  unit: string
+  type: 'borrow' | 'share'
+  status: 'available' | 'borrowed'
+  photo?: File
+}
+
+export interface UserItemUpdate {
+  name: string
+  description: string
+  qty: number
+  unit: string
+  type: 'borrow' | 'share'
+  status: 'available' | 'borrowed'
+  photo?: File
+}
+
+// User Requests types
+export interface RequestItemInfo {
+  id: number
+  name: string
+  thumbnail_url?: string
+  unit: string
+}
+
+export interface RequestUser {
+  id: number
+  username: string
+  name: string
+  address: string
+}
+
+export interface RequestResponse {
+  id: number
+  item: RequestItemInfo
+  requester?: RequestUser
+  owner?: RequestUser
+  requested_qty: number
+  unit: string
+  date_start: string
+  date_end: string
+  status: 'pending' | 'approved' | 'rejected' | 'returned' | 'cancelled'
+  created_at: string
+  updated_at: string
+}
+
+export interface RequestListResponse {
+  requests: RequestResponse[]
+}
+
+export interface RequestStatusUpdate {
+  status: 'approved' | 'rejected' | 'returned' | 'cancelled'
+}
+
 // Generic API client
 class ApiClient {
   private baseURL: string
@@ -130,7 +207,7 @@ class ApiClient {
     this.baseURL = baseURL || API_BASE_URL || 'http://localhost:8000'
   }
 
-  private async request<T>(
+  public async request<T>(
     endpoint: string,
     options: RequestInit = {}
   ): Promise<T> {
@@ -149,6 +226,18 @@ class ApiClient {
       const response = await fetch(url, config)
       
       if (!response.ok) {
+        // Handle 401 Unauthorized globally - redirect to login
+        if (response.status === 401) {
+          // Only redirect on client side to avoid SSR issues
+          if (process.client) {
+            await navigateTo('/login')
+          }
+          throw {
+            detail: 'Authentication required. Redirecting to login...',
+            status: 401
+          } as ApiError
+        }
+
         const errorData = await response.json().catch(() => ({ detail: 'Network error' }))
         throw {
           detail: errorData.detail || `HTTP ${response.status}`,
@@ -274,6 +363,74 @@ export const itemsApi = {
 export const aiApi = {
   async generateRecipe(request: RecipeRequest): Promise<RecipeResponse> {
     return apiClient.postWithAuth<RecipeResponse>('/ai/recipe', request)
+  }
+}
+
+// User Items API service
+export const userItemsApi = {
+  async getUserItems(): Promise<UserItemListResponse> {
+    return apiClient.getWithAuth<UserItemListResponse>('/user/items')
+  },
+
+  async createUserItem(formData: FormData): Promise<UserItem> {
+    const headers: Record<string, string> = {}
+    
+    // Try to get token from memory first (fallback)
+    if (AUTH_TOKEN) {
+      headers['Authorization'] = `Bearer ${AUTH_TOKEN}`
+    }
+
+    return apiClient.request<UserItem>('/user/items', {
+      method: 'POST',
+      headers,
+      body: formData,
+      credentials: 'include',
+    })
+  },
+
+  async updateUserItem(itemId: number, formData: FormData): Promise<UserItem> {
+    const headers: Record<string, string> = {}
+    
+    // Try to get token from memory first (fallback)
+    if (AUTH_TOKEN) {
+      headers['Authorization'] = `Bearer ${AUTH_TOKEN}`
+    }
+
+    return apiClient.request<UserItem>(`/user/items/${itemId}`, {
+      method: 'PUT',
+      headers,
+      body: formData,
+      credentials: 'include',
+    })
+  },
+
+  async deleteUserItem(itemId: number): Promise<{ message: string; item_id: number }> {
+    return apiClient.request<{ message: string; item_id: number }>(`/user/items/${itemId}`, {
+      method: 'DELETE',
+      credentials: 'include',
+    })
+  }
+}
+
+// User Requests API service
+export const userRequestsApi = {
+  async getUserRequests(type: 'incoming' | 'outgoing'): Promise<RequestListResponse> {
+    const params = new URLSearchParams({
+      type: type
+    })
+    
+    return apiClient.getWithAuth<RequestListResponse>(`/user/requests?${params.toString()}`)
+  },
+
+  async updateRequestStatus(
+    requestId: number,
+    statusUpdate: RequestStatusUpdate
+  ): Promise<RequestResponse> {
+    return apiClient.request<RequestResponse>(`/user/requests/${requestId}`, {
+      method: 'PATCH',
+      body: JSON.stringify(statusUpdate),
+      credentials: 'include',
+    })
   }
 }
 

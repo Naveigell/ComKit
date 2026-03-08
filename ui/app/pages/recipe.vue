@@ -37,7 +37,7 @@
           </div>
           <div class="flex items-center space-x-4">
             <button
-              @click="$router.push('/dashboard?action=add')"
+              @click="navigateTo('/dashboard?action=add')"
               data-testid="add-item-btn"
               class="relative inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
             >
@@ -187,22 +187,40 @@
         </div>
       </div>
     </main>
+
+    <AuthLoadingOverlay :is-authenticating="isAuthenticating" />
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useAuth } from "~~/composables/useAuth"
 import { aiApi, type RecipeResponse } from "~~/services/api"
-import authMiddleware from "~~/middleware/auth"
+import AuthLoadingOverlay from "~~/components/AuthLoadingOverlay.vue"
 
 // Page metadata
 definePageMeta({
-  middleware: authMiddleware
+  title: 'Recipe - ComKit',
+  description: 'AI Recipe Generator'
 })
 
-// Auth
-const { logout } = useAuth()
+// Authentication check
+onMounted(async () => {
+  // Check authentication on client side
+  if (process.client) {
+    isAuthenticating.value = true
+    try {
+      const { authApi } = await import('~~/services/api')
+      await authApi.validateCookies()
+      // If successful, allow the page to work normally
+    } catch (error) {
+      // Redirect to login if not authenticated
+      await navigateTo('/login')
+    } finally {
+      isAuthenticating.value = false
+    }
+  }
+})
 
 // State
 const ingredients = ref('')
@@ -212,6 +230,7 @@ const isLoading = ref(false)
 const error = ref('')
 const isLoggingOut = ref(false)
 const notificationCount = ref(0)
+const isAuthenticating = ref(false)
 
 // Methods
 const generateRecipe = async () => {

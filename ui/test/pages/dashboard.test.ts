@@ -22,6 +22,12 @@ vi.mock('#app/composables', () => ({
   navigateTo: vi.fn()
 }))
 
+// Mock process.client
+Object.defineProperty(process, 'client', {
+  value: true,
+  writable: true
+})
+
 // Mock API responses
 const mockItemsResponse = {
   items: [
@@ -75,8 +81,26 @@ describe('Dashboard Page (Homepage)', () => {
     vi.clearAllMocks()
     
     // Setup fetch mock to return successful response
-    mockFetch.mockImplementation(() => {
-      return Promise.resolve(new Response(JSON.stringify(mockItemsResponse), {
+    mockFetch.mockImplementation((url) => {
+      if (url.includes('/auth/validate-cookies')) {
+        return Promise.resolve(new Response(JSON.stringify({
+          access_token: 'mock-token',
+          user: { id: 1, name: 'Test User', username: 'testuser' }
+        }), {
+          status: 200,
+          statusText: 'OK',
+          headers: { 'Content-Type': 'application/json' },
+        }))
+      } else if (url.includes('/items?')) {
+        return Promise.resolve(new Response(JSON.stringify(mockItemsResponse), {
+          status: 200,
+          statusText: 'OK',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+        }))
+      }
+      return Promise.resolve(new Response(JSON.stringify({}), {
         status: 200,
         statusText: 'OK',
         headers: {
@@ -127,11 +151,14 @@ describe('Dashboard Page (Homepage)', () => {
   })
 
   it('displays items list', async () => {
-    const wrapper = mount(Dashboard)
-    await wrapper.vm.$nextTick()
-    
-    // Wait for API call to complete
-    await new Promise(resolve => setTimeout(resolve, 0))
+    const wrapper = mount(Dashboard, {
+      global: { stubs: { NuxtLink: true } }
+    })
+    const vm = getVm(wrapper)
+
+    // Manually trigger authentication and data loading
+    await vm.loadItems()
+
     await wrapper.vm.$nextTick()
 
     // Should display mock items
@@ -142,13 +169,14 @@ describe('Dashboard Page (Homepage)', () => {
   })
 
   it('has correct item data structure', async () => {
-    const wrapper = mount(Dashboard)
+    const wrapper = mount(Dashboard, {
+      global: { stubs: { NuxtLink: true } }
+    })
     const vm = getVm(wrapper)
 
-    await wrapper.vm.$nextTick()
-    
-    // Wait for API call to complete
-    await new Promise(resolve => setTimeout(resolve, 0))
+    // Manually trigger data loading
+    await vm.loadItems()
+
     await wrapper.vm.$nextTick()
 
     expect(vm.items.length).toBe(2)
@@ -164,10 +192,9 @@ describe('Dashboard Page (Homepage)', () => {
     })
     const vm = getVm(wrapper)
 
-    await wrapper.vm.$nextTick()
-    
-    // Wait for API call to complete
-    await new Promise(resolve => setTimeout(resolve, 0))
+    // Manually trigger data loading
+    await vm.loadItems()
+
     await wrapper.vm.$nextTick()
 
     expect(vm.items.length).toBe(2)

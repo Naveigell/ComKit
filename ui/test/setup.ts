@@ -28,25 +28,7 @@ Object.defineProperty(document, 'cookie', {
   value: 'access_token=mock-token'
 })
 
-export const mockFetch = vi.fn(() => {
-  const responseData = {
-    items: [],
-    pagination: {
-      current_page: 1,
-      total_pages: 3,
-      total_items: 67,
-      items_per_page: 25
-    }
-  }
-  
-  return Promise.resolve(new Response(JSON.stringify(responseData), {
-    status: 200,
-    statusText: 'OK',
-    headers: {
-      'Content-Type': 'application/json'
-    }
-  }))
-})
+export const mockFetch = vi.fn()
 
 globalThis.fetch = mockFetch
 

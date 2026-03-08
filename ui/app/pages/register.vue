@@ -288,7 +288,7 @@
 import { ref } from 'vue'
 import { useAuth } from '~~/composables/useAuth'
 
-import guestMiddleware from "~~/middleware/guest"
+import guestMiddleware from "~~/middleware/guest.client"
 
 // Page metadata
 definePageMeta({
