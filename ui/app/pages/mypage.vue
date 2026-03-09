@@ -11,7 +11,7 @@
           <div v-if="userItems.length === 0" class="text-center py-8">
             <p class="text-gray-500">Belum ada item yang dibagikan.</p>
           </div>
-          <ul v-else role="list" class="divide-y divide-gray-200">
+          <ul v-if="userItems.length > 0" role="list" class="divide-y divide-gray-200">
             <li v-for="item in userItems" :key="item.id" class="px-6 py-4">
               <div class="flex items-center justify-between">
                 <div class="flex items-center">
@@ -48,6 +48,9 @@
               </div>
             </li>
           </ul>
+          <button @click="showAddItemModal = true" class="w-full bg-primary-600 text-white py-2 px-4 rounded-lg hover:bg-primary-700 mt-4">
+            Tambah Item Baru
+          </button>
         </div>
       </div>
 

@@ -2,8 +2,6 @@
 let API_BASE_URL: string
 let AUTH_TOKEN: string | null = null
 
-const config = useRuntimeConfig()
-
 // Function to initialize API base URL (call this in plugin or middleware)
 export const initApi = (baseURL: string) => {
   API_BASE_URL = baseURL
@@ -206,7 +204,7 @@ class ApiClient {
   private baseURL: string
 
   constructor(baseURL?: string) {
-    this.baseURL = baseURL || API_BASE_URL || config.public.apiBase || 'http://localhost:8000'
+    this.baseURL = baseURL || API_BASE_URL || 'http://localhost:8000'
   }
 
   public async request<T>(
