@@ -33,12 +33,10 @@
             </div>
           </div>
           <div class="flex items-center space-x-4">
-            <button
-              @click="showAddItemModal = true"
-              class="relative inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
-            >
-              + Add Item
-            </button>
+            <div class="flex items-center space-x-2">
+              <span class="text-sm text-gray-700">Welcome,</span>
+              <span class="text-sm font-medium text-primary-700">{{ user.name }}</span>
+            </div>
             <button
               @click="handleLogout"
               :disabled="isLoggingOut"
@@ -248,6 +246,7 @@ import { ref, onMounted, computed } from 'vue'
 import { userItemsApi, userRequestsApi, authApi } from '~~/services/api'
 import type { UserItem, RequestResponse } from '~~/services/api'
 import AuthLoadingOverlay from '~~/components/AuthLoadingOverlay.vue'
+import { useAuth } from "~~/composables/useAuth"
 
 const runtimeConfig = useRuntimeConfig()
 const defaultImage = runtimeConfig.public.defaultPlaceholderImage
@@ -259,6 +258,12 @@ definePageMeta({
   title: 'MyPage - ComKit',
   description: 'Manage your items and requests'
 })
+
+// Use auth composable
+const { user: authUser, logout } = useAuth()
+
+// Computed user data from auth
+const user = computed(() => authUser.value || { name: 'User', username: 'user' })
 
 // Reactive data
 const userItems = ref<UserItem[]>([])
@@ -322,14 +327,13 @@ const loadRequests = async () => {
 }
 
 const handleLogout = async () => {
-  isLoggingOut.value = true
+  if (isLoggingOut.value) return // Prevent multiple clicks
+  
   try {
-    // Clear auth cookies
-    await fetch('/auth/clear-cookies', { credentials: 'include' })
-    // Redirect to login
-    await navigateTo('/login')
-  } catch (error) {
-    console.error('Logout failed:', error)
+    isLoggingOut.value = true
+    await logout()
+  } catch (error: any) {
+    console.error('Logout error:', error)
   } finally {
     isLoggingOut.value = false
   }

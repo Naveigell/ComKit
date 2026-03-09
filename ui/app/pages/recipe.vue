@@ -36,13 +36,10 @@
             </div>
           </div>
           <div class="flex items-center space-x-4">
-            <button
-              @click="navigateTo('/dashboard?action=add')"
-              data-testid="add-item-btn"
-              class="relative inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
-            >
-              + Add Item
-            </button>
+            <div class="flex items-center space-x-2">
+              <span class="text-sm text-gray-700">Welcome,</span>
+              <span class="text-sm font-medium text-primary-700">{{ user.name }}</span>
+            </div>
             <button
               @click="handleLogout"
               data-testid="logout-btn"
@@ -193,7 +190,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { useAuth } from "~~/composables/useAuth"
 import { aiApi, type RecipeResponse } from "~~/services/api"
 import AuthLoadingOverlay from "~~/components/AuthLoadingOverlay.vue"
@@ -203,6 +200,12 @@ definePageMeta({
   title: 'Recipe - ComKit',
   description: 'AI Recipe Generator'
 })
+
+// Use auth composable
+const { user: authUser, logout } = useAuth()
+
+// Computed user data from auth
+const user = computed(() => authUser.value || { name: 'User', username: 'user' })
 
 // Authentication check
 onMounted(async () => {
