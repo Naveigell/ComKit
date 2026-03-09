@@ -88,6 +88,10 @@
                     <p class="text-sm text-gray-600">
                       Available: {{ item.remaining_qty }}/{{ item.qty }} {{ item.unit }}
                     </p>
+                    <span class="inline-flex items-center px-2.5 py-0.5 mt-3 rounded-full text-xs font-medium"
+                          :class="item.type === 'borrow' ? 'bg-blue-100 text-blue-800' : 'bg-green-100 text-green-800'">
+                      {{ item.type === 'borrow' ? 'Pinjam' : 'Bagikan' }}
+                    </span>
                   </div>
                   <button
                     @click="toggleExpand(item.id)"
