@@ -1,6 +1,26 @@
 // API base configuration
 let API_BASE_URL: string
 let AUTH_TOKEN: string | null = null
+let IS_REDIRECTING_TO_LOGIN = false
+
+interface ApiRequestOptions extends RequestInit {
+  requiresAuth?: boolean
+}
+
+const handleUnauthorized = () => {
+  AUTH_TOKEN = null
+
+  if (typeof window === 'undefined' || IS_REDIRECTING_TO_LOGIN) {
+    return
+  }
+
+  if (window.location.pathname === '/login') {
+    return
+  }
+
+  IS_REDIRECTING_TO_LOGIN = true
+  window.location.assign('/login')
+}
 
 // Function to initialize API base URL (call this in plugin or middleware)
 export const initApi = (baseURL: string) => {
@@ -209,17 +229,18 @@ class ApiClient {
 
   public async request<T>(
     endpoint: string,
-    options: RequestInit = {}
+    options: ApiRequestOptions = {}
   ): Promise<T> {
+    const { requiresAuth = false, ...requestOptions } = options
     const url = `${this.baseURL}${endpoint}`
     
     const config: RequestInit = {
       credentials: 'include', // Include cookies in requests
       headers: {
         'Content-Type': 'application/json',
-        ...options.headers,
+        ...requestOptions.headers,
       },
-      ...options,
+      ...requestOptions,
     }
 
     try {
@@ -227,6 +248,11 @@ class ApiClient {
       
       if (!response.ok) {
         const errorData = await response.json().catch(() => null)
+
+        if (response.status === 401 && requiresAuth) {
+          handleUnauthorized()
+        }
+
         throw {
           detail: errorData?.detail || errorData?.error || `HTTP ${response.status}`,
           status: response.status
@@ -294,6 +320,7 @@ class ApiClient {
     return this.request<T>(endpoint, {
       method: 'GET',
       headers,
+      requiresAuth: true,
     })
   }
 }
@@ -330,8 +357,16 @@ export const authApi = {
   },
 
   async validateCookies(): Promise<AuthResponse> {
-    // This endpoint should validate HTTP-only cookies and return auth data
-    return apiClient.get<AuthResponse>('/auth/validate-cookies')
+    try {
+      const response = await apiClient.get<AuthResponse>('/auth/validate-cookies')
+      if (response.access_token) {
+        setAuthToken(response.access_token)
+      }
+      return response
+    } catch (error) {
+      AUTH_TOKEN = null
+      throw error
+    }
   }
 }
 
@@ -385,6 +420,7 @@ export const userItemsApi = {
       headers,
       body: formData,
       credentials: 'include',
+      requiresAuth: true,
     })
   },
 
@@ -401,6 +437,7 @@ export const userItemsApi = {
       headers,
       body: formData,
       credentials: 'include',
+      requiresAuth: true,
     })
   },
 
@@ -416,6 +453,7 @@ export const userItemsApi = {
       method: 'DELETE',
       headers,
       credentials: 'include',
+      requiresAuth: true,
     })
   }
 }
