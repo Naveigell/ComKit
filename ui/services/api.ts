@@ -226,21 +226,9 @@ class ApiClient {
       const response = await fetch(url, config)
       
       if (!response.ok) {
-        // Handle 401 Unauthorized globally - redirect to login
-        if (response.status === 401) {
-          // Only redirect on client side to avoid SSR issues
-          if (process.client) {
-            await navigateTo('/login')
-          }
-          throw {
-            detail: 'Authentication required. Redirecting to login...',
-            status: 401
-          } as ApiError
-        }
-
-        const errorData = await response.json().catch(() => ({ detail: 'Network error' }))
+        const errorData = await response.json().catch(() => null)
         throw {
-          detail: errorData.detail || `HTTP ${response.status}`,
+          detail: errorData?.detail || errorData?.error || `HTTP ${response.status}`,
           status: response.status
         } as ApiError
       }

@@ -9,9 +9,6 @@ services:
       - ./server-fastapi/.env
     environment:
       PORT: "8000"
-      ENVIRONMENT: development
-      DATABASE_URL: sqlite:///./kitchen.db
-      OLLAMA_API_URL: ${OLLAMA_API_URL:-http://host.docker.internal:11434}
       PYTHONDONTWRITEBYTECODE: "1"
       PYTHONUNBUFFERED: "1"
       WATCHFILES_FORCE_POLLING: "true"

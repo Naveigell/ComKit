@@ -15,9 +15,12 @@ load_dotenv()
 
 router = APIRouter(prefix="/ai", tags=["AI Recipe"])
 
-OLLAMA_API_URL = os.getenv("OLLAMA_API_URL", "https://api.ollama.com")
+OLLAMA_API_URL = os.getenv("OLLAMA_API_URL", "https://api.ollama.com").rstrip("/")
 OLLAMA_API_KEY = os.getenv("OLLAMA_API_KEY")
-DEFAULT_OLLAMA_MODEL = os.getenv("DEFAULT_OLLAMA_MODEL")
+DEFAULT_OLLAMA_MODEL = (
+    os.getenv("DEFAULT_OLLAMA_MODEL")
+    or os.getenv("OLLAMA_DEFAULT_MODEL")
+)
 
 # Cookie-based authentication for AI endpoint
 async def get_current_user_from_cookies_or_token(http_request: Request, db: Session = Depends(get_db)):
@@ -51,6 +54,12 @@ async def generate_recipe(
 ):
     if not request.ingredients or request.ingredients.strip() == "":
         raise HTTPException(status_code=400, detail="Ingredients cannot be empty")
+
+    if not DEFAULT_OLLAMA_MODEL:
+        raise HTTPException(
+            status_code=503,
+            detail="AI model is not configured on the server"
+        )
     
     # Prepare prompt for Ollama
     prompt = f"""Generate a recipe using these ingredients: {request.ingredients}
@@ -85,7 +94,7 @@ Only respond with valid JSON, no additional text."""
             )
             
             if response.status_code != 200:
-                # Try with mistral as fallback
+                # Retry once in case the upstream service returns a transient error.
                 response = await client.post(
                     f"{OLLAMA_API_URL}/api/generate",
                     json={
