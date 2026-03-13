@@ -24,11 +24,8 @@ TestAlurPengguna.js adalah test automation script untuk menguji skenario lengkap
 ### 1. Install Dependencies
 
 ```bash
-# Install Playwright di root project
-npm install -D @playwright/test
-
-# Atau install di direktori testing
-cd end2end-test
+# Install Playwright di direktori testing
+cd sourcecode/end2end-test
 npm install -D @playwright/test
 ```
 
@@ -54,19 +51,35 @@ docker-compose up -d
 ### Run All Tests
 
 ```bash
-# Dari root directory
+cd sourcecode/end2end-test
 npx playwright test
+```
+
+### Run ke Server yang Sudah Berjalan
+
+Gunakan mode ini jika frontend/backend sudah Anda jalankan manual, agar Playwright tidak mencoba start `npm run dev` lagi.
+
+```bash
+cd sourcecode/end2end-test
+
+# Semua test tanpa start webServer dari Playwright
+npm run test:running-server
+
+# Atau test file tertentu
+PLAYWRIGHT_SKIP_WEB_SERVER=1 npx playwright test TestAlurPengguna.js --project=chromium
 ```
 
 ### Run Specific Test File
 
 ```bash
-npx playwright test end2end-test/TestAlurPengguna.js
+npx playwright test TestAlurPengguna.js
 ```
 
 ### Run Specific Phase/Test
 
 ```bash
+cd sourcecode/end2end-test
+
 # Menjalankan hanya Fase 1 (Registrasi)
 npx playwright test -g "Fase 1: User1 Registrasi dan Setup"
 
@@ -77,6 +90,8 @@ npx playwright test -g "Fase 3"
 ### Run dengan Debug Mode
 
 ```bash
+cd sourcecode/end2end-test
+
 # Interactive mode dengan UI
 npx playwright test --ui
 
@@ -84,12 +99,14 @@ npx playwright test --ui
 npx playwright test --headed
 
 # Single test dengan debug
-npx playwright test end2end-test/TestAlurPengguna.js -g "Fase 1" --debug
+npx playwright test TestAlurPengguna.js -g "Fase 1" --debug
 ```
 
 ### Run pada Browser Spesifik
 
 ```bash
+cd sourcecode/end2end-test
+
 # Hanya Chrome
 npx playwright test --project=chromium
 
@@ -108,6 +125,8 @@ npx playwright test --project="Mobile Chrome"
 ### HTML Report
 
 ```bash
+cd sourcecode/end2end-test
+
 # Generate HTML report
 npx playwright test
 
@@ -126,6 +145,8 @@ Test results akan tersimpan di `test-results/junit.xml` untuk CI/CD integration.
 Anda dapat mengatur variabel berikut:
 
 ```bash
+cd sourcecode/end2end-test
+
 # Custom base URL
 BASE_URL=http://localhost:8001 npx playwright test
 
@@ -227,8 +248,11 @@ jobs:
         with:
           node-version: 18
       - run: npm ci
+        working-directory: sourcecode/end2end-test
       - run: docker-compose up -d
+        working-directory: sourcecode
       - run: npx playwright test
+        working-directory: sourcecode/end2end-test
 ```
 
 ## References
