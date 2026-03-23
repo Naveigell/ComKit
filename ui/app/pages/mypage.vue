@@ -6,7 +6,13 @@
     <main class="pt-12 pb-16 px-4">
       <!-- Section Item Saya -->
       <div class="mb-8">
-        <h2 class="text-2xl font-bold text-gray-900 mb-4">Item Saya</h2>
+        <div class="flex items-center justify-between mb-4 mt-5">
+          <h2 class="text-2xl font-bold text-gray-900">Item Saya</h2>
+          <button @click="showAddItemModal = true" class="inline-flex items-center justify-center bg-primary-600 text-white py-1 px-2 rounded-lg hover:bg-primary-700 transition-colors duration-200 font-medium shadow-md text-sm">
+            <Plus class="w-3 h-3 mr-1" />
+            Tambah Item Baru
+          </button>
+        </div>
         <div class="bg-white shadow overflow-hidden sm:rounded-md">
           <div v-if="userItems.length === 0" class="text-center py-8">
             <p class="text-gray-500">Belum ada item yang dibagikan.</p>
@@ -48,9 +54,6 @@
               </div>
             </li>
           </ul>
-          <button @click="showAddItemModal = true" class="w-full bg-primary-600 text-white py-2 px-4 rounded-lg hover:bg-primary-700 mt-4">
-            Tambah Item Baru
-          </button>
         </div>
       </div>
 
@@ -351,6 +354,7 @@ import AuthLoadingOverlay from '~~/components/AuthLoadingOverlay.vue'
 import { useAuth } from "~~/composables/useAuth"
 import BottomNavigation from '~~/components/BottomNavigation.vue'
 import TopHeader from '~~/components/TopHeader.vue'
+import { Plus } from 'lucide-vue-next'
 
 const runtimeConfig = useRuntimeConfig()
 const defaultImage = runtimeConfig.public.defaultPlaceholderImage
