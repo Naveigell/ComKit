@@ -221,10 +221,75 @@ export interface RequestStatusUpdate {
 
 // Generic API client
 class ApiClient {
-  private baseURL: string
+  private baseURL: string | null = null
 
   constructor(baseURL?: string) {
-    this.baseURL = baseURL || API_BASE_URL || 'http://localhost:8000'
+    this.baseURL = baseURL || null // don't hardcode inside constructor
+  }
+
+  // Debug function
+  private getDebugURLInfo(): any {
+    let processEnv = undefined;
+    let runtimeConfig = undefined;
+    let windowLocation = undefined;
+    
+    try { processEnv = process.env.NUXT_PUBLIC_API_BASE; } catch(e) {}
+    try { 
+      // @ts-ignore
+      const config = useRuntimeConfig(); 
+      runtimeConfig = config?.public?.apiBase 
+    } catch(e) {}
+    try { windowLocation = window.location.origin; } catch(e) {}
+
+    return {
+      module_level_API_BASE_URL: API_BASE_URL,
+      this_baseURL: this.baseURL,
+      process_env_API_BASE: processEnv,
+      runtime_config_base: runtimeConfig,
+      window_location: windowLocation
+    };
+  }
+
+  private resolveCurrentBaseURL(): string {
+    if (this.baseURL && this.baseURL !== 'http://localhost:8000') return this.baseURL;
+    if (API_BASE_URL && API_BASE_URL !== 'http://localhost:8000') return API_BASE_URL;
+    
+    // Try browser global if injected by nitro payload
+    if (typeof window !== 'undefined') {
+       // @ts-ignore
+       if (window.__NUXT__?.config?.public?.apiBase) {
+         // @ts-ignore
+         return window.__NUXT__.config.public.apiBase;
+       }
+    }
+
+    try {
+      const config = useRuntimeConfig();
+      if (config?.public?.apiBase && config.public.apiBase !== 'http://localhost:8000') {
+        return config.public.apiBase as string;
+      }
+    } catch (e) {}
+
+    // Fallback: If we detect we are in browser, try to use relative or dynamic origin
+    if (typeof window !== 'undefined') {
+        const port = window.location.port;
+        // If frontend is on port 17999, maybe backend is on 18000
+        if (port === '17999') {
+             return `${window.location.protocol}//${window.location.hostname}:18000`;
+        }
+        
+        // As a generic fallback to be same domain, maybe same port or just relative base
+        // But traditionally we might rely on the window location's hostname.
+        if (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+             return `${window.location.protocol}//${window.location.hostname}:18000`;
+        }
+    }
+
+    return 'http://localhost:8000'; // Default development backend
+  }
+
+  public setBaseURL(url: string) {
+    this.baseURL = url;
   }
 
   public async request<T>(
@@ -232,7 +297,14 @@ class ApiClient {
     options: ApiRequestOptions = {}
   ): Promise<T> {
     const { requiresAuth = false, ...requestOptions } = options
-    const url = `${this.baseURL}${endpoint}`
+    const resolvedURL = this.resolveCurrentBaseURL()
+    
+    // DEBUG LOG BEFORE REQUEST:
+    console.warn(`[API DEBUG] Intercepted Request to ${endpoint}`)
+    console.table(this.getDebugURLInfo())
+    console.warn(`[API DEBUG] Final Resolved Base URL: ${resolvedURL}`)
+
+    const url = `${resolvedURL}${endpoint}`
     
     const config: RequestInit = {
       credentials: 'include', // Include cookies in requests
