@@ -94,18 +94,8 @@
               </div>
               
               <div class="bg-gray-50 p-4 rounded-lg">
-                <h3 class="font-semibold text-gray-800 mb-2">💬 Pesan Langsung</h3>
-                <p class="text-gray-600 text-sm">Komunikasi langsung dengan pemilik peralatan untuk koordinasi yang mudah.</p>
-              </div>
-              
-              <div class="bg-gray-50 p-4 rounded-lg">
                 <h3 class="font-semibold text-gray-800 mb-2">🤖 AI Resep</h3>
                 <p class="text-gray-600 text-sm">Buat resep makanan dari bahan terbatas yang tersedia dengan bantuan AI yang cerdas. Hemat waktu dan dapatkan inspirasi masakan baru.</p>
-              </div>
-              
-              <div class="bg-gray-50 p-4 rounded-lg">
-                <h3 class="font-semibold text-gray-800 mb-2">📱 Notifikasi</h3>
-                <p class="text-gray-600 text-sm">Dapatkan pemberitahuan tentang ketersediaan peralatan dan status peminjaman secara real-time.</p>
               </div>
             </div>
           </section>
