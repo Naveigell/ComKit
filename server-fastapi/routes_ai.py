@@ -10,14 +10,15 @@ from models import User
 from schemas import RecipeRequest, RecipeResponse
 from auth import get_current_user, decode_token
 from database import get_db
+from config import config_manager
 
 router = APIRouter(prefix="/ai", tags=["AI Recipe"])
 
-OLLAMA_API_URL = os.getenv("OLLAMA_API_URL", "https://api.ollama.com").rstrip("/")
-OLLAMA_API_KEY = os.getenv("OLLAMA_API_KEY")
+OLLAMA_API_URL = config_manager.get("OLLAMA_API_URL", "https://api.ollama.com").rstrip("/")
+OLLAMA_API_KEY = config_manager.get("OLLAMA_API_KEY")
 DEFAULT_OLLAMA_MODEL = (
-    os.getenv("DEFAULT_OLLAMA_MODEL")
-    or os.getenv("OLLAMA_DEFAULT_MODEL")
+    config_manager.get("DEFAULT_OLLAMA_MODEL")
+    or config_manager.get("OLLAMA_DEFAULT_MODEL")
 )
 
 # Abstract Factory for AI prompt generation

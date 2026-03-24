@@ -19,6 +19,7 @@ from routes_user_requests import router as user_requests_router
 from routes_ai import router as ai_router
 from routes_dev import router as dev_router
 from routes_websocket import router as websocket_router
+from config import config_manager
 from exceptions import http_exception_handler, validation_exception_handler
 
 
@@ -41,10 +42,10 @@ def get_cors_allowed_origins() -> list[str]:
     ]
 
 
-IS_DEVELOPMENT = os.getenv("ENVIRONMENT", "production").lower() == "development"
+IS_DEVELOPMENT = config_manager.get("ENVIRONMENT", "production").lower() == "development"
 CORS_ALLOWED_ORIGINS = get_cors_allowed_origins()
 CORS_ALLOW_ORIGIN_REGEX = r"^https?://(localhost|127\.0\.0\.1)(:\d+)?$" if IS_DEVELOPMENT else None
-ENABLE_NOTIFICATIONS = os.getenv("ENABLE_NOTIFICATIONS", "true").lower() == "true"
+ENABLE_NOTIFICATIONS = config_manager.get_bool("ENABLE_NOTIFICATIONS", True)
 
 # Create media directory
 os.makedirs("media/items", exist_ok=True)

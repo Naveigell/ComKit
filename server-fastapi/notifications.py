@@ -8,9 +8,22 @@ from abc import ABC, abstractmethod
 logger = logging.getLogger(__name__)
 
 class NotificationManager:
+    """Singleton class for managing WebSocket connections and notifications"""
+    _instance = None
+    _initialized = False
+    
+    def __new__(cls):
+        if cls._instance is None:
+            cls._instance = super(NotificationManager, cls).__new__(cls)
+        return cls._instance
+    
     def __init__(self):
-        # Store active connections by user_id
-        self.active_connections: Dict[int, List[WebSocket]] = {}
+        # Only initialize once
+        if not NotificationManager._initialized:
+            # Store active connections by user_id
+            self.active_connections: Dict[int, List[WebSocket]] = {}
+            NotificationManager._initialized = True
+            logger.info("NotificationManager singleton initialized")
     
     async def connect(self, websocket: WebSocket, user_id: int):
         """Connect a WebSocket for a specific user"""
@@ -76,6 +89,14 @@ class NotificationManager:
     def get_user_connection_count(self, user_id: int) -> int:
         """Get number of active connections for a user"""
         return len(self.active_connections.get(user_id, []))
+    
+    def get_stats(self) -> dict:
+        """Get connection statistics"""
+        return {
+            "total_users": len(self.active_connections),
+            "total_connections": sum(len(connections) for connections in self.active_connections.values()),
+            "connected_users": list(self.active_connections.keys())
+        }
 
 # Abstract Factory for creating notifications
 class NotificationFactory(ABC):
@@ -144,7 +165,7 @@ class NotificationFactoryProvider:
         
         return factory
 
-# Global instance
+# Singleton instance
 notification_manager = NotificationManager()
 
 # Convenience functions for backward compatibility

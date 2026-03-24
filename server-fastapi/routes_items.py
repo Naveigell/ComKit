@@ -7,12 +7,12 @@ from models import Item, Request, User, RequestStatus
 from schemas import ItemListResponse, ItemResponse, ItemOwner, RequestCreate, RequestResponse, RequestItemInfo, RequestUser
 from auth import get_current_user
 from notifications import notification_manager, create_new_request_notification
-import os
+from config import config_manager
 
 router = APIRouter(prefix="/items", tags=["Items"])
 
 # Check if notifications are enabled
-ENABLE_NOTIFICATIONS = os.getenv("ENABLE_NOTIFICATIONS", "true").lower() == "true"
+ENABLE_NOTIFICATIONS = config_manager.get_bool("ENABLE_NOTIFICATIONS", True)
 
 @router.get("", response_model=ItemListResponse)
 def get_items(
