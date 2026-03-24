@@ -2,6 +2,7 @@ from abc import ABC, abstractmethod
 from typing import Any, Dict, Optional
 import logging
 from enum import Enum
+from ai_observer import event_publisher, NotificationType
 
 logger = logging.getLogger(__name__)
 
@@ -43,6 +44,42 @@ class AIRequestContext:
         }
         self.history.append(entry)
         logger.info(f"Request {self.request_id}: {state.value} - {message}")
+        
+        # Notify observers of state change
+        self._notify_observers(state, message, data)
+    
+    async def _notify_observers(self, state: AIRequestState, message: str, data: Optional[Dict[str, Any]] = None):
+        """Notify observers of state changes"""
+        try:
+            if state == AIRequestState.PROCESSING:
+                await event_publisher.publish_request_started(
+                    self.request_id, 
+                    self.user_id, 
+                    self.ingredients
+                )
+            elif state == AIRequestState.COMPLETED and self.result:
+                await event_publisher.publish_request_completed(
+                    self.request_id,
+                    self.user_id,
+                    self.result,
+                    self.get_duration() or 0.0
+                )
+            elif state == AIRequestState.FAILED:
+                await event_publisher.publish_request_failed(
+                    self.request_id,
+                    self.user_id,
+                    self.error_message or "Unknown error",
+                    self.attempts
+                )
+            elif state == AIRequestState.RETRYING:
+                await event_publisher.publish_request_retrying(
+                    self.request_id,
+                    self.user_id,
+                    self.attempts,
+                    message
+                )
+        except Exception as e:
+            logger.error(f"Error notifying observers: {e}")
     
     def set_state(self, new_state: AIRequestState, message: str = "", data: Optional[Dict[str, Any]] = None):
         """Change state and log the transition"""

@@ -14,10 +14,41 @@ from config import config_manager
 from decorators import log_execution_time, retry_on_failure, cache_result
 from ai_proxy import ai_proxy
 from ai_state import ai_state_machine, AIRequestState
+from ai_observer import (
+    ai_request_notifier, 
+    LoggingObserver, 
+    MetricsObserver, 
+    WebSocketObserver,
+    DatabaseObserver
+)
+from notifications import notification_manager
 import logging
 import uuid
 
 logger = logging.getLogger(__name__)
+
+# Initialize observers (only once)
+def initialize_observers():
+    """Initialize all observers for the AI notification system"""
+    if ai_request_notifier.get_observer_count() == 0:
+        # Attach logging observer
+        ai_request_notifier.attach(LoggingObserver())
+        
+        # Attach metrics observer
+        ai_request_notifier.attach(MetricsObserver())
+        
+        # Attach WebSocket observer if notifications are enabled
+        if config_manager.get_bool("ENABLE_NOTIFICATIONS", True):
+            ai_request_notifier.attach(WebSocketObserver(notification_manager))
+        
+        # Attach database observer
+        # Note: This would need database session factory
+        # ai_request_notifier.attach(DatabaseObserver(db_session_factory))
+        
+        logger.info(f"Initialized {ai_request_notifier.get_observer_count()} observers")
+
+# Initialize observers when module loads
+initialize_observers()
 
 router = APIRouter(prefix="/ai", tags=["AI Recipe"])
 
@@ -245,3 +276,75 @@ async def cancel_request(request_id: str, current_user: User = Depends(get_curre
     except Exception as e:
         logger.error(f"Failed to cancel request: {str(e)}")
         raise HTTPException(status_code=500, detail="Failed to cancel request")
+
+@router.get("/observers/status")
+@log_execution_time
+async def get_observers_status(current_user: User = Depends(get_current_user_from_cookies_or_token)):
+    """Get status of all observers and recent events"""
+    try:
+        # Get metrics from metrics observer
+        metrics_observer = None
+        for observer in ai_request_notifier._observers:
+            if hasattr(observer, 'get_metrics'):
+                metrics_observer = observer
+                break
+        
+        metrics = metrics_observer.get_metrics() if metrics_observer else {}
+        
+        # Get recent event history
+        recent_events = ai_request_notifier.get_event_history(limit=50)
+        
+        return {
+            "observer_count": ai_request_notifier.get_observer_count(),
+            "observers": [obs.get_observer_id() for obs in ai_request_notifier._observers],
+            "metrics": metrics,
+            "recent_events": [
+                {
+                    "event_type": event.event_type.value,
+                    "request_id": event.request_id,
+                    "user_id": event.user_id,
+                    "message": event.message,
+                    "timestamp": event.timestamp.isoformat(),
+                    "data": event.data
+                }
+                for event in recent_events
+            ]
+        }
+    except Exception as e:
+        logger.error(f"Failed to get observer status: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to get observer status")
+
+@router.get("/metrics")
+@log_execution_time
+async def get_ai_metrics(current_user: User = Depends(get_current_user_from_cookies_or_token)):
+    """Get AI service metrics from metrics observer"""
+    try:
+        # Find metrics observer
+        metrics_observer = None
+        for observer in ai_request_notifier._observers:
+            if hasattr(observer, 'get_metrics'):
+                metrics_observer = observer
+                break
+        
+        if not metrics_observer:
+            raise HTTPException(status_code=404, detail="Metrics observer not found")
+        
+        metrics = metrics_observer.get_metrics()
+        
+        # Calculate additional derived metrics
+        success_rate = 0.0
+        if metrics["total_requests"] > 0:
+            success_rate = (metrics["completed_requests"] / metrics["total_requests"]) * 100
+        
+        return {
+            "performance_metrics": metrics,
+            "derived_metrics": {
+                "success_rate_percent": round(success_rate, 2),
+                "failure_rate_percent": round(100 - success_rate, 2),
+                "retry_rate_percent": round((metrics["retry_count"] / max(metrics["total_requests"], 1)) * 100, 2),
+                "fallback_rate_percent": round((metrics["fallback_count"] / max(metrics["total_requests"], 1)) * 100, 2)
+            }
+        }
+    except Exception as e:
+        logger.error(f"Failed to get AI metrics: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to get AI metrics")
