@@ -4,6 +4,7 @@ from json import JSONDecodeError
 import json
 import logging
 from abc import ABC, abstractmethod
+from decorators import log_execution_time, retry_on_failure
 
 logger = logging.getLogger(__name__)
 
@@ -48,6 +49,8 @@ class NotificationManager:
             except ValueError:
                 logger.warning(f"WebSocket not found for user {user_id}")
     
+    @log_execution_time
+    @retry_on_failure(max_retries=3, delay_seconds=0.1)
     async def send_personal_notification(self, user_id: int, notification: dict):
         """Send a notification to a specific user"""
         if user_id in self.active_connections:
@@ -66,6 +69,7 @@ class NotificationManager:
         else:
             logger.info(f"No active connections for user {user_id}")
     
+    @log_execution_time
     async def broadcast_notification(self, notification: dict):
         """Broadcast a notification to all connected users"""
         for user_id, connections in self.active_connections.items():

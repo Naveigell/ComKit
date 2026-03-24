@@ -8,6 +8,7 @@ from schemas import ItemListResponse, ItemResponse, ItemOwner, RequestCreate, Re
 from auth import get_current_user
 from notifications import notification_manager, create_new_request_notification
 from config import config_manager
+from decorators import log_execution_time, database_transaction
 
 router = APIRouter(prefix="/items", tags=["Items"])
 
@@ -81,6 +82,8 @@ def get_items(
     )
 
 @router.post("/{item_id}/request", status_code=201)
+@log_execution_time
+@database_transaction()
 async def request_item(
     item_id: int,
     request_data: RequestCreate,

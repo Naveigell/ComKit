@@ -5,6 +5,9 @@ from dotenv import load_dotenv
 # Load environment variables FIRST before any imports that use them
 load_dotenv()
 
+# Initialize logging configuration
+import logging_config
+
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles

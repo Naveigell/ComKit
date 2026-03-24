@@ -8,6 +8,7 @@ from schemas import RequestListResponse, RequestResponse, RequestItemInfo, Reque
 from auth import get_current_user
 from notifications import notification_manager, create_request_notification
 from config import config_manager
+from decorators import log_execution_time, database_transaction
 
 router = APIRouter(prefix="/user/requests", tags=["User Requests"])
 
@@ -91,6 +92,8 @@ def get_user_requests(
     return RequestListResponse(requests=response_list)
 
 @router.patch("/{request_id}", response_model=RequestResponse)
+@log_execution_time
+@database_transaction()
 async def update_request_status(
     request_id: int,
     status_update: RequestStatusUpdate,
