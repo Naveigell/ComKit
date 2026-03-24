@@ -4,6 +4,7 @@ import httpx
 import os
 import json
 from sqlalchemy.orm import Session
+from abc import ABC, abstractmethod
 
 from models import User
 from schemas import RecipeRequest, RecipeResponse
@@ -18,6 +19,51 @@ DEFAULT_OLLAMA_MODEL = (
     os.getenv("DEFAULT_OLLAMA_MODEL")
     or os.getenv("OLLAMA_DEFAULT_MODEL")
 )
+
+# Abstract Factory for AI prompt generation
+class AIPromptFactory(ABC):
+    """Abstract base class for AI prompt factories"""
+    
+    @abstractmethod
+    def create_prompt(self, **kwargs) -> str:
+        """Create a prompt with given parameters"""
+        pass
+
+class RecipePromptFactory(AIPromptFactory):
+    """Factory for creating recipe generation prompts"""
+    
+    def create_prompt(self, **kwargs) -> str:
+        """Create a recipe generation prompt"""
+        ingredients = kwargs.get("ingredients", "")
+        return f"""Generate a recipe using these ingredients: {ingredients}
+
+Please provide the recipe in the following JSON format:
+{{
+    "title": "Recipe Name",
+    "ingredients": ["ingredient 1", "ingredient 2", ...],
+    "instructions": ["step 1", "step 2", ...],
+    "cooking_time": "time in minutes",
+    "servings": "number of servings",
+    "difficulty": "easy|medium|hard"
+}}
+
+Only respond with valid JSON, no additional text."""
+
+class AIPromptFactoryProvider:
+    """Provider class to manage AI prompt factories"""
+    
+    @staticmethod
+    def get_factory(prompt_type: str) -> AIPromptFactory:
+        """Get the appropriate factory for the prompt type"""
+        factories = {
+            "recipe": RecipePromptFactory()
+        }
+        
+        factory = factories.get(prompt_type)
+        if not factory:
+            raise ValueError(f"Unknown prompt type: {prompt_type}")
+        
+        return factory
 
 # Cookie-based authentication for AI endpoint
 async def get_current_user_from_cookies_or_token(http_request: Request, db: Session = Depends(get_db)):
@@ -58,20 +104,12 @@ async def generate_recipe(
             detail="AI model is not configured on the server"
         )
     
-    # Prepare prompt for Ollama
-    prompt = f"""Generate a recipe using these ingredients: {request.ingredients}
-
-Please provide the recipe in the following JSON format:
-{{
-    "title": "Recipe Name",
-    "ingredients": ["ingredient 1", "ingredient 2", ...],
-    "instructions": ["step 1", "step 2", ...],
-    "cooking_time": "time in minutes",
-    "servings": "number of servings",
-    "difficulty": "easy|medium|hard"
-}}
-
-Only respond with valid JSON, no additional text."""
+    # Use Factory Method to create prompt
+    try:
+        prompt_factory = AIPromptFactoryProvider.get_factory("recipe")
+        prompt = prompt_factory.create_prompt(ingredients=request.ingredients)
+    except ValueError as e:
+        raise HTTPException(status_code=500, detail=str(e))
     
     try:
         # Prepare headers for Ollama API

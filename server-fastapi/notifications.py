@@ -3,6 +3,7 @@ from fastapi import WebSocket, WebSocketDisconnect
 from json import JSONDecodeError
 import json
 import logging
+from abc import ABC, abstractmethod
 
 logger = logging.getLogger(__name__)
 
@@ -76,10 +77,77 @@ class NotificationManager:
         """Get number of active connections for a user"""
         return len(self.active_connections.get(user_id, []))
 
+# Abstract Factory for creating notifications
+class NotificationFactory(ABC):
+    """Abstract base class for notification factories"""
+    
+    @abstractmethod
+    def create_notification(self, **kwargs) -> dict:
+        """Create a notification with given parameters"""
+        pass
+    
+    def _create_base_notification(self, notification_type: str, data: dict) -> dict:
+        """Create base notification structure"""
+        return {
+            "type": notification_type,
+            "data": data,
+            "timestamp": json.dumps({"$date": {"$numberLong": str(int(__import__('time').time() * 1000))}})
+        }
+
+class RequestNotificationFactory(NotificationFactory):
+    """Factory for creating request-related notifications"""
+    
+    def create_notification(self, **kwargs) -> dict:
+        """Create a request status update notification"""
+        return self._create_base_notification(
+            "request_update",
+            {
+                "request_id": kwargs.get("request_id"),
+                "item_name": kwargs.get("item_name"),
+                "requester_name": kwargs.get("requester_name"),
+                "owner_name": kwargs.get("owner_name"),
+                "status": kwargs.get("status"),
+                "notification_type": kwargs.get("notification_type")
+            }
+        )
+
+class NewRequestNotificationFactory(NotificationFactory):
+    """Factory for creating new request notifications"""
+    
+    def create_notification(self, **kwargs) -> dict:
+        """Create a new incoming request notification"""
+        return self._create_base_notification(
+            "new_request",
+            {
+                "request_id": kwargs.get("request_id"),
+                "item_name": kwargs.get("item_name"),
+                "requester_name": kwargs.get("requester_name"),
+                "requested_qty": kwargs.get("requested_qty"),
+                "unit": kwargs.get("unit")
+            }
+        )
+
+class NotificationFactoryProvider:
+    """Provider class to manage notification factories"""
+    
+    @staticmethod
+    def get_factory(notification_type: str) -> NotificationFactory:
+        """Get the appropriate factory for the notification type"""
+        factories = {
+            "request_update": RequestNotificationFactory(),
+            "new_request": NewRequestNotificationFactory()
+        }
+        
+        factory = factories.get(notification_type)
+        if not factory:
+            raise ValueError(f"Unknown notification type: {notification_type}")
+        
+        return factory
+
 # Global instance
 notification_manager = NotificationManager()
 
-# Notification templates
+# Convenience functions for backward compatibility
 def create_request_notification(
     type: str,
     request_id: int,
@@ -88,19 +156,16 @@ def create_request_notification(
     owner_name: str,
     status: str
 ) -> dict:
-    """Create a standardized request notification"""
-    return {
-        "type": "request_update",
-        "data": {
-            "request_id": request_id,
-            "item_name": item_name,
-            "requester_name": requester_name,
-            "owner_name": owner_name,
-            "status": status,
-            "notification_type": type
-        },
-        "timestamp": json.dumps({"$date": {"$numberLong": str(int(__import__('time').time() * 1000))}})
-    }
+    """Create a standardized request notification (backward compatibility)"""
+    factory = NotificationFactoryProvider.get_factory("request_update")
+    return factory.create_notification(
+        request_id=request_id,
+        item_name=item_name,
+        requester_name=requester_name,
+        owner_name=owner_name,
+        status=status,
+        notification_type=type
+    )
 
 def create_new_request_notification(
     request_id: int,
@@ -109,15 +174,12 @@ def create_new_request_notification(
     requested_qty: int,
     unit: str
 ) -> dict:
-    """Create a notification for new incoming request"""
-    return {
-        "type": "new_request",
-        "data": {
-            "request_id": request_id,
-            "item_name": item_name,
-            "requester_name": requester_name,
-            "requested_qty": requested_qty,
-            "unit": unit
-        },
-        "timestamp": json.dumps({"$date": {"$numberLong": str(int(__import__('time').time() * 1000))}})
-    }
+    """Create a notification for new incoming request (backward compatibility)"""
+    factory = NotificationFactoryProvider.get_factory("new_request")
+    return factory.create_notification(
+        request_id=request_id,
+        item_name=item_name,
+        requester_name=requester_name,
+        requested_qty=requested_qty,
+        unit=unit
+    )
