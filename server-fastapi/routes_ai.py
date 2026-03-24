@@ -13,7 +13,9 @@ from database import get_db
 from config import config_manager
 from decorators import log_execution_time, retry_on_failure, cache_result
 from ai_proxy import ai_proxy
+from ai_state import ai_state_machine, AIRequestState
 import logging
+import uuid
 
 logger = logging.getLogger(__name__)
 
@@ -96,7 +98,6 @@ async def get_current_user_from_cookies_or_token(http_request: Request, db: Sess
 
 @router.post("/recipe", response_model=RecipeResponse)
 @log_execution_time
-@retry_on_failure(max_retries=2, delay_seconds=0.5)
 async def generate_recipe(
     request: RecipeRequest,
     current_user: User = Depends(get_current_user_from_cookies_or_token)
@@ -110,70 +111,137 @@ async def generate_recipe(
             detail="AI service is not configured on the server"
         )
     
-    # Use Factory Method to create prompt
+    # Generate unique request ID
+    request_id = str(uuid.uuid4())
+    
     try:
+        # Use Factory Method to create prompt
         prompt_factory = AIPromptFactoryProvider.get_factory("recipe")
         prompt = prompt_factory.create_prompt(ingredients=request.ingredients)
     except ValueError as e:
         raise HTTPException(status_code=500, detail=str(e))
     
     try:
-        # Use AI Proxy to generate recipe with fallback
-        result = await ai_proxy.generate_recipe(
+        # Process request through state machine
+        context = await ai_state_machine.process_request(
+            user_id=current_user.id,
             ingredients=prompt,
-            model=config_manager.get("DEFAULT_OLLAMA_MODEL")
+            request_id=request_id
         )
         
-        # Parse the response content
-        content = result.get("content", "")
-        provider = result.get("provider", "unknown")
-        
-        # Try to parse JSON from response
-        try:
-            # Extract JSON from markdown code blocks if present
-            if "```json" in content:
-                json_start = content.find("```json") + 7
-                json_end = content.find("```", json_start)
-                content = content[json_start:json_end].strip()
-            elif "```" in content:
-                json_start = content.find("```") + 3
-                json_end = content.find("```", json_start)
-                content = content[json_start:json_end].strip()
+        # Check final state
+        if context.current_state == AIRequestState.COMPLETED:
+            result = context.result
             
-            recipe_data = json.loads(content)
+            # Parse the response content
+            content = result.get("content", "")
+            provider = result.get("provider", "unknown")
             
-            # Validate required fields
-            if not all(k in recipe_data for k in ["title", "ingredients", "instructions"]):
-                raise ValueError("Missing required fields")
+            # Try to parse JSON from response
+            try:
+                # Extract JSON from markdown code blocks if present
+                if "```json" in content:
+                    json_start = content.find("```json") + 7
+                    json_end = content.find("```", json_start)
+                    content = content[json_start:json_end].strip()
+                elif "```" in content:
+                    json_start = content.find("```") + 3
+                    json_end = content.find("```", json_start)
+                    content = content[json_start:json_end].strip()
+                
+                recipe_data = json.loads(content)
+                
+                # Validate required fields
+                if not all(k in recipe_data for k in ["title", "ingredients", "instructions"]):
+                    raise ValueError("Missing required fields")
+                
+            except (json.JSONDecodeError, ValueError):
+                # Fallback to raw text if parsing fails
+                recipe_data = {
+                    "title": "Generated Recipe",
+                    "raw_text": content,
+                    "ingredients": [],
+                    "instructions": [],
+                    "cooking_time": "N/A",
+                    "servings": "N/A",
+                    "difficulty": "N/A"
+                }
             
-        except (json.JSONDecodeError, ValueError):
-            # Fallback to raw text if parsing fails
-            recipe_data = {
-                "title": "Generated Recipe",
-                "raw_text": content,
-                "ingredients": [],
-                "instructions": [],
-                "cooking_time": "N/A",
-                "servings": "N/A",
-                "difficulty": "N/A"
-            }
-        
-        logger.info(f"Recipe generated successfully using {provider} provider")
-        
-        return RecipeResponse(
-            recipe=recipe_data,
-            generated_at=datetime.utcnow()
-        )
+            logger.info(f"Recipe generated successfully using {provider} provider")
             
-    except httpx.TimeoutException as e:
-        logger.error(f"AI service timeout: {e}")
+            return RecipeResponse(
+                recipe=recipe_data,
+                generated_at=datetime.utcnow()
+            )
+        else:
+            # Request failed
+            error_msg = context.error_message or "Unknown error occurred"
+            raise HTTPException(
+                status_code=500,
+                detail=f"Failed to generate recipe: {error_msg}"
+            )
+            
+    except Exception as e:
+        logger.error(f"Unexpected error in recipe generation: {str(e)}")
         raise HTTPException(
-            status_code=503,
-            detail="AI service temporarily unavailable. Please try again later"
+            status_code=500,
+            detail="An unexpected error occurred while processing your request"
         )
-    except httpx.RequestError as e:
-        logger.error(f"AI service request error: {e}")
-        raise HTTPException(
-            status_code=503,
-            detail="AI service temporarily unavailable. Please try again later"
-        )
+
+@router.get("/request/{request_id}/status")
+@log_execution_time
+async def get_request_status(request_id: str, current_user: User = Depends(get_current_user_from_cookies_or_token)):
+    """Get status of a specific AI request"""
+    try:
+        status = ai_state_machine.get_request_status(request_id)
+        if not status:
+            raise HTTPException(status_code=404, detail="Request not found")
+        
+        # Verify user owns this request
+        if status.get("user_id") != current_user.id:
+            raise HTTPException(status_code=403, detail="Access denied")
+        
+        return status
+    except Exception as e:
+        logger.error(f"Failed to get request status: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to get request status")
+
+@router.get("/requests/active")
+@log_execution_time
+async def get_active_requests(current_user: User = Depends(get_current_user_from_cookies_or_token)):
+    """Get all active requests for current user"""
+    try:
+        all_requests = ai_state_machine.get_all_active_requests()
+        # Filter requests for current user
+        user_requests = {
+            req_id: status for req_id, status in all_requests.items()
+            if status.get("user_id") == current_user.id
+        }
+        return {"active_requests": user_requests}
+    except Exception as e:
+        logger.error(f"Failed to get active requests: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to get active requests")
+
+@router.delete("/request/{request_id}")
+@log_execution_time
+async def cancel_request(request_id: str, current_user: User = Depends(get_current_user_from_cookies_or_token)):
+    """Cancel an active AI request"""
+    try:
+        # Check if request exists and belongs to user
+        status = ai_state_machine.get_request_status(request_id)
+        if not status:
+            raise HTTPException(status_code=404, detail="Request not found")
+        
+        if status.get("user_id") != current_user.id:
+            raise HTTPException(status_code=403, detail="Access denied")
+        
+        # Cancel the request
+        success = ai_state_machine.cancel_request(request_id)
+        if success:
+            return {"message": "Request cancelled successfully"}
+        else:
+            raise HTTPException(status_code=400, detail="Cannot cancel completed request")
+            
+    except Exception as e:
+        logger.error(f"Failed to cancel request: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to cancel request")
