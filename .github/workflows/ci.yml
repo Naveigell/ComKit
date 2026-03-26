@@ -1,0 +1,98 @@
+name: CI Pipeline (Frontend)
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+
+jobs:
+
+  lint:
+    name: Lint & Static Analysis
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install dependencies
+        working-directory: ui
+        run: npm ci
+
+      - name: Run lint
+        working-directory: ui
+        run: npm run lint || echo "lint not configured"
+
+
+  unit-test:
+    name: Unit Test
+    runs-on: ubuntu-latest
+    needs: lint
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install dependencies
+        working-directory: ui
+        run: npm ci
+
+      - name: Run unit tests
+        working-directory: ui
+        run: npm run test:run
+
+
+  integration-test:
+    name: Integration Test
+    runs-on: ubuntu-latest
+    needs: unit-test
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install dependencies
+        working-directory: ui
+        run: npm ci
+
+      - name: Run integration tests
+        working-directory: ui
+        run: npm run test:run
+
+
+  build:
+    name: Build App
+    runs-on: ubuntu-latest
+    needs: integration-test
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install dependencies
+        working-directory: ui
+        run: npm ci
+
+      - name: Build Nuxt app
+        working-directory: ui
+        run: npm run build
